@@ -1,31 +1,40 @@
 import { FirebaseDatabase } from "@/firebase/config";
-import { ref, onValue, get, child } from "firebase/database";
+import { ref, push, child, set, remove } from "firebase/database";
+import { useEffect, useRef, useState } from "react";
 
 export default function Dashboard() {
 
-/*     function writeNewPost(uid, username, picture, title, body) {
-        const db = getDatabase();
-      
-        // A post entry.
-        const postData = {
-          author: username,
-          uid: uid,
-          body: body,
-          title: title,
-          starCount: 0,
-          authorPic: picture
-        };
-      
-        // Get a key for a new Post.
-        const newPostKey = push(child(ref(db), 'posts')).key;
-      
-        // Write the new post's data simultaneously in the posts list and the user's post list.
-        const updates = {};
-        updates['/posts/' + newPostKey] = postData;
-        updates['/user-posts/' + uid + '/' + newPostKey] = postData;
-      
-        return update(ref(db), updates);
-    } */
+    const [pingRequest, setPingRequest] = useState(true);
+    const pingLock = useRef(false);
+
+    useEffect(() => {
+        console.log("Ping Request: "+pingRequest)
+        console.log("Ping Lock: "+pingLock.current)
+        if (pingRequest && !pingLock.current) {
+            pingLock.current = true;
+            const dbRef = ref(FirebaseDatabase);
+            const pingID = push(child(dbRef, 'pings')).key;
+            const timeNow = Date.now();
+            set(child(dbRef, `pings/${pingID}`), {
+                timestamp: timeNow
+            })
+            .then(() => {
+                console.log("\nPing Request Sent\nWrite Time: "+(Date.now() - timeNow)+"ms");
+                pingLock.current = false;
+            })
+            .catch((error) => {
+                console.error(error);
+                pingLock.current = false;
+            });
+            
+            remove(child(dbRef, `pings/${pingID}`));
+            setPingRequest(false);
+        } else {
+            console.log("Ping Request Blocked");
+        }
+    }, [pingRequest])
+    
+
 
     return (<></>)
 }
