@@ -1,5 +1,9 @@
 import { FirebaseDatabase } from "@/firebase/config";
-import { ref, onValue, get, child } from "firebase/database";
+import { ref, onValue, get, child, set } from "firebase/database";
+import { useSearchParams } from "next/navigation";
+import { generateSlug } from "random-word-slugs";
+import { use, useEffect, useRef, useState } from "react";
+
 
 export default function Display() {
 
@@ -23,6 +27,22 @@ export default function Display() {
             updateStarCount(postElement, data);
         }
     }); */
+
+    const searchParams = useSearchParams();
+
+    const initialRender = useRef(true);
+    const [gameID, setGameID] = useState("");
+
+    useEffect(() => {
+        console.log("Initial Render: "+initialRender.current);
+        if (initialRender.current) {
+            initialRender.current = false;
+            const newGameID = searchParams.get("gameID") || generateSlug()
+            setGameID(newGameID);
+            console.log("Game ID: "+newGameID);
+        }
+    }, [initialRender]);
+
 
     return (<></>)
 }
