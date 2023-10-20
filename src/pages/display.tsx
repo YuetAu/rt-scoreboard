@@ -28,10 +28,13 @@ export default function Display() {
         }
     }); */
 
+    const dbRef = ref(FirebaseDatabase);
+
     const searchParams = useSearchParams();
 
     const initialRender = useRef(true);
     const [gameID, setGameID] = useState("");
+    const gameFetchLock = useRef(false);
 
     useEffect(() => {
         console.log("Initial Render: "+initialRender.current);
@@ -42,6 +45,26 @@ export default function Display() {
             console.log("Game ID: "+newGameID);
         }
     }, [initialRender]);
+
+    useEffect(() => {
+        if (gameID && !gameFetchLock.current) {
+            get(child(dbRef, `games/${gameID}`)).then((snapshot) => {
+                if (snapshot.exists()) {
+                    //Game already exists
+                    //Match Up to status
+                    console.log(snapshot.val());
+                } else {
+                    console.log("No data available");
+                    //Game does not exist
+                    //New Game
+                }
+            }).catch((error) => {
+                console.error(error);
+            }).finally(() => {
+                gameFetchLock.current = false;
+            });
+        }
+    }, [gameID]);
 
 
     return (<></>)
