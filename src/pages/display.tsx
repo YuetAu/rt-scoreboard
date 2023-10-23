@@ -3,7 +3,7 @@ import { FirebaseDatabase } from "@/firebase/config";
 import { Box, Button } from "@chakra-ui/react";
 import { ref, onValue, get, child, set, update } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
-import { useEffect, useRef, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import { useTimer } from "react-timer-and-stopwatch";
 
 export default function Display() {
@@ -16,7 +16,7 @@ export default function Display() {
     const [gameStatus, setGameStatus] = useState("WAITING");
     const [gameStage, setGameStage] = useState("PREP");
     const gameFetchLock = useRef(false);
-    const clockElapse = useRef(0);
+    const clockToggle = useRef(false);
 
     useEffect(() => {
         if (initialRender.current) {
@@ -35,25 +35,7 @@ export default function Display() {
             status: "WAITING",
             device: { [deviceID]: "DISPLAY" },
             clock: { stage: "PREP", timestamp: 0, elapsed: 0 }
-            /* clockSkew: "",
-            clockSkewArray: {}, */
         }).then(() => {
-            // What a Grand Clock will do shit
-            /* onValue(child(dbRef, `games/${gameID}/clockSkew`), (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    setTimeout(() => {
-                        var array = [];
-                        get(child(dbRef, `games/${gameID}/clockSkewArray/${data}`)).then((snapshot) => {
-                            const data = snapshot.val();
-                            if (data) {
-                                array = [...data];
-                            }
-                        })
-                        set(child(dbRef, `games/${gameID}/clockSkewArray/${data}`), array.push(Date.now()));
-                    }, 1000);
-                }
-            }); */
             onValue(child(dbRef, `games/${gameID}/device`), (snapshot) => {
                 const deviceData = snapshot.val();
                 if (deviceData) {
@@ -73,33 +55,6 @@ export default function Display() {
                     });
                 }
             });
-            onValue(child(dbRef, `games/${gameID}/status`), (snapshot) => {
-                const status = snapshot.val();
-                if (status) {
-                    setGameStatus(status);
-                }
-            });
-            onValue(child(dbRef, `games/${gameID}/clock`), (snapshot) => {
-                const clockData = snapshot.val();
-                console.log(clockData);
-                if (clockData) {
-                    if (clockData.timestamp != 0) {
-                        console.log("Updating Clock")
-                        setGameStage(clockData.stage);
-                        clockElapse.current = clockData.elapsed;
-                        resetTimer({
-                            create: {
-                                timerWithDuration: {
-                                    time: {
-                                        milliseconds: (GAME_STAGES_TIME[GAME_STAGES.indexOf(clockData.stage)]*1000)-clockData.elapsed,
-                                    }
-                                }
-                            },
-                            autoplay: clockData.paused ? false : true
-                        });
-                    }
-                }
-            })
             return true;
         }).catch((error) => {
             console.error(error);
@@ -108,20 +63,32 @@ export default function Display() {
         return false;
     };
 
-
-    
-
     useEffect(() => {
         if (gameID && !gameFetchLock.current) {
             console.log("Fetching Game: "+gameID);
             get(child(dbRef, `games/${gameID}`)).then((snapshot) => {
                 if (snapshot.exists()) {
                     console.log("Game Fetched");
-                    setGameStatus(snapshot.val().status);
+                    const gameData = snapshot.val();
+                    setGameStatus(gameData.status);
+                    setGameStage(gameData.clock.stage);
+                    setClock(gameData.clock)
                 } else {
                     console.log("Creating New Game");
                     createGame(gameID);
                 }
+                onValue(child(dbRef, `games/${gameID}/status`), (snapshot) => {
+                    const status = snapshot.val();
+                    if (status) {
+                        setGameStatus(status);
+                    }
+                });
+                onValue(child(dbRef, `games/${gameID}/clock`), (snapshot) => {
+                    const clockData = snapshot.val();
+                    if (clockData) {
+                        setClock(clockData);
+                    }
+                })
             }).catch((error) => {
                 console.error(error);
             }).finally(() => {
@@ -130,6 +97,23 @@ export default function Display() {
         }
     }, [gameID])
 
+    const setClock = (clockData: any) => {
+        if (clockData.timestamp != 0) {
+            console.log("Updating Clock")
+            setGameStage(clockData.stage);
+            clockToggle.current = !clockData.paused;
+            timer.resetTimer({
+                create: {
+                    timerWithDuration: {
+                        time: {
+                            milliseconds: clockData.paused ? (GAME_STAGES_TIME[GAME_STAGES.indexOf(clockData.stage)]*1000)-clockData.elapsed : (GAME_STAGES_TIME[GAME_STAGES.indexOf(clockData.stage)]*1000)-clockData.elapsed-(Date.now()-clockData.timestamp),
+                        }
+                    }
+                },
+                autoplay: clockData.paused ? false : true
+            });
+        }
+    }
    
     const timer = useTimer({
         create: {
@@ -150,12 +134,12 @@ export default function Display() {
             },
         }
     });
-    const {resetTimer, timerIsFinished, subtractTime} = timer;
+    
 
     useEffect(() => {
-        if (timerIsFinished) {
+        if (timer.timerIsFinished) {
             console.log(`Resetting Timer for ${gameStage}`);
-            resetTimer({
+            timer.resetTimer({
                 create: {
                     timerWithDuration: {
                         time: {
@@ -165,6 +149,15 @@ export default function Display() {
                 },
                 autoplay: true
             });
+        }
+        set(child(dbRef, `games/${gameID}/clock`), {
+            stage: gameStage,
+            timestamp: Date.now(),
+            elapsed: 0,
+            paused: false
+        })
+        if (gameStage === "END") {
+            clockToggle.current = false;
         }
     }, [gameStage])
     

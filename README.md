@@ -16,3 +16,9 @@ Run the development server
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 
+## Synced Clock
+
+Please be reminded that due to interent latency, clocks may be out of sync from each other.
+
+Connect all Display and Controller before starting the game to ensure that all clocks are synced.
+

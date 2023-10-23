@@ -4,7 +4,7 @@ import { Box, Button, FormControl, Input, Modal, ModalBody, ModalContent, ModalF
 import { time } from "console";
 import { ref, push, child, set, remove, get, update, onValue } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
-import { useEffect, useRef, useState } from "react";
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import { useTimer } from "react-timer-and-stopwatch";
 
 export default function Dashboard() {
@@ -48,6 +48,7 @@ export default function Dashboard() {
     const [gameStage, setGameStage] = useState("PREP");
     const gameFetchLock = useRef(false);
     const clockElapse = useRef(0);
+    const forceNextStage = useRef(false);
 
     useEffect(() => {
         if (gameID && !gameFetchLock.current) {
@@ -59,6 +60,7 @@ export default function Dashboard() {
                         device: { ...gameData.device, [deviceID]: "CONTROLLER" },
                     });
                     console.log("Game Fetched");
+                    setClock(gameData.clock);
                     onValue(child(dbRef, `games/${gameID}/status`), (snapshot) => {
                         const status = snapshot.val();
                         if (status) {
@@ -67,23 +69,8 @@ export default function Dashboard() {
                     });
                     onValue(child(dbRef, `games/${gameID}/clock`), (snapshot) => {
                         const clockData = snapshot.val();
-                        console.log(clockData);
                         if (clockData) {
-                            if (clockData.timestamp != 0) {
-                                console.log("Updating Clock")
-                                setGameStage(clockData.stage);
-                                clockElapse.current = clockData.elapsed;
-                                timer.resetTimer({
-                                    create: {
-                                        timerWithDuration: {
-                                            time: {
-                                                milliseconds: (GAME_STAGES_TIME[GAME_STAGES.indexOf(clockData.stage)]*1000)-clockData.elapsed,
-                                            }
-                                        }
-                                    },
-                                    autoplay: clockData.paused ? false : true
-                                });
-                            }
+                            setClock(clockData);
                         }
                     })
                 } else {
@@ -97,6 +84,25 @@ export default function Dashboard() {
             });
         }
     }, [gameID])
+
+    const setClock = (clockData: any) => {
+        if (clockData.timestamp != 0) {
+            console.log("Updating Clock")
+            setGameStage(clockData.stage);
+            clockToggle.current = !clockData.paused;
+            clockElapse.current = clockData.elapsed;
+            timer.resetTimer({
+                create: {
+                    timerWithDuration: {
+                        time: {
+                            milliseconds: clockData.paused ? (GAME_STAGES_TIME[GAME_STAGES.indexOf(clockData.stage)]*1000)-clockData.elapsed : (GAME_STAGES_TIME[GAME_STAGES.indexOf(clockData.stage)]*1000)-clockData.elapsed-(Date.now()-clockData.timestamp),
+                        }
+                    }
+                },
+                autoplay: clockData.paused ? false : true
+            });
+        }
+    }
 
     const gameIDInput = useRef<HTMLInputElement>(null);
     const [gameIDModal, setGameIDModal] = useState(true);
@@ -132,7 +138,8 @@ export default function Dashboard() {
     });
 
     useEffect(() => {
-        if (timer.timerIsFinished) {
+        if (forceNextStage.current) {
+            forceNextStage.current = false;
             console.log(`Resetting Timer for ${gameStage}`);
             timer.resetTimer({
                 create: {
@@ -193,6 +200,34 @@ export default function Dashboard() {
         }
     }
 
+    const resetTimer = () => {
+        timer.resetTimer({
+            create: {
+                timerWithDuration: {
+                    time: {
+                        seconds: GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage)],
+                    }
+                }
+            },
+            autoplay: false
+        });
+        set(child(dbRef, `games/${gameID}/clock`), {
+            stage: gameStage,
+            timestamp: Date.now(),
+            elapsed: 0,
+            paused: true
+        })
+    }
+
+    const changeStage = (skipStage:number) => {
+        if (GAME_STAGES.indexOf(gameStage)+skipStage < 0 ) return;
+        if (GAME_STAGES.indexOf(gameStage)+skipStage > GAME_STAGES.length-1 ) return;
+        const index = GAME_STAGES.indexOf(gameStage);
+        const nextStage = GAME_STAGES[index+skipStage];
+        forceNextStage.current = true;
+        setGameStage(nextStage);
+    }
+
     return (
         <>
         <Box>
@@ -202,7 +237,9 @@ export default function Dashboard() {
             <h1>Game Stage: {gameStage}</h1>
             <h1>Time Left: {timer.timerText}</h1>
             <Button onClick={toggleClock}>Toggle Timer</Button>
-            <Button onClick={()=>timer.resetTimer()}>Reset Timer</Button>
+            <Button onClick={resetTimer}>Reset Timer</Button>
+            <Button onClick={()=>changeStage(1)}>Next Stage</Button>
+            <Button onClick={()=>changeStage(-1)}>Previous Stage</Button>
         </Box>
         <Modal isOpen={gameIDModal} onClose={()=>{}} isCentered>
             <ModalOverlay />
