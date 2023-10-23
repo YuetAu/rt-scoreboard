@@ -7,7 +7,7 @@ import { generateSlug } from "random-word-slugs";
 import { SetStateAction, useEffect, useRef, useState } from "react";
 import { useTimer } from "react-timer-and-stopwatch";
 
-export default function Dashboard() {
+export default function Display() {
 
     const dbRef = ref(FirebaseDatabase);
 
