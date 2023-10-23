@@ -1,9 +1,10 @@
+import { GAME_STAGES, GAME_STAGES_TIME } from "@/common/gameStages";
 import { FirebaseDatabase } from "@/firebase/config";
-import { Box } from "@chakra-ui/react";
+import { Box, Button } from "@chakra-ui/react";
 import { ref, onValue, get, child, set, update } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
 import { useEffect, useRef, useState } from "react";
-
+import { useTimer } from "react-timer-and-stopwatch";
 
 export default function Display() {
 
@@ -13,7 +14,9 @@ export default function Display() {
     const [gameID, setGameID] = useState("");
     const [deviceID, setDeviceID] = useState("");
     const [gameStatus, setGameStatus] = useState("WAITING");
+    const [gameStage, setGameStage] = useState("PREP");
     const gameFetchLock = useRef(false);
+    const clockElapse = useRef(0);
 
     useEffect(() => {
         if (initialRender.current) {
@@ -31,12 +34,11 @@ export default function Display() {
             createdAt: Date.now(),
             status: "WAITING",
             device: { [deviceID]: "DISPLAY" },
-            grandClock: deviceID,
-            clock: { stage: "WAIT", timestamp: 0, remaining: 0 }
+            clock: { stage: "PREP", timestamp: 0, elapsed: 0 }
             /* clockSkew: "",
             clockSkewArray: {}, */
         }).then(() => {
-            // What a Grand Clock will do
+            // What a Grand Clock will do shit
             /* onValue(child(dbRef, `games/${gameID}/clockSkew`), (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
@@ -77,6 +79,27 @@ export default function Display() {
                     setGameStatus(status);
                 }
             });
+            onValue(child(dbRef, `games/${gameID}/clock`), (snapshot) => {
+                const clockData = snapshot.val();
+                console.log(clockData);
+                if (clockData) {
+                    if (clockData.timestamp != 0) {
+                        console.log("Updating Clock")
+                        setGameStage(clockData.stage);
+                        clockElapse.current = clockData.elapsed;
+                        resetTimer({
+                            create: {
+                                timerWithDuration: {
+                                    time: {
+                                        milliseconds: (GAME_STAGES_TIME[GAME_STAGES.indexOf(clockData.stage)]*1000)-clockData.elapsed,
+                                    }
+                                }
+                            },
+                            autoplay: clockData.paused ? false : true
+                        });
+                    }
+                }
+            })
             return true;
         }).catch((error) => {
             console.error(error);
@@ -84,6 +107,7 @@ export default function Display() {
         });
         return false;
     };
+
 
     
 
@@ -106,12 +130,53 @@ export default function Display() {
         }
     }, [gameID])
 
+   
+    const timer = useTimer({
+        create: {
+            timerWithDuration: {
+                time: {
+                    minutes: 1,
+                }
+            }
+        },
+        includeMilliseconds: true,
+        intervalRate: 37,
+        autoplay: false,
+        callbacks: {
+            onFinish: () => {
+                const index = GAME_STAGES.indexOf(gameStage);
+                const nextStage = GAME_STAGES[index+1];
+                setGameStage(nextStage);
+            },
+        }
+    });
+    const {resetTimer, timerIsFinished, subtractTime} = timer;
+
+    useEffect(() => {
+        if (timerIsFinished) {
+            console.log(`Resetting Timer for ${gameStage}`);
+            resetTimer({
+                create: {
+                    timerWithDuration: {
+                        time: {
+                            minutes: GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage)],
+                        }
+                    }
+                },
+                autoplay: true
+            });
+        }
+    }, [gameStage])
+    
+
 
     return (
         <Box>
             <h1>Game ID: {gameID}</h1>
             <h1>Device ID: {deviceID}</h1>
             <h1>Game Status: {gameStatus}</h1>
+            <h1>Game Stage: {gameStage}</h1>
+            <h1>Time Left: {timer.timerText}</h1>
         </Box>
     )
 }

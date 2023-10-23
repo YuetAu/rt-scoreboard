@@ -1,0 +1,4 @@
+const GAME_STAGES = ["PREP", "GAME", "END"]
+const GAME_STAGES_TIME = [60, 600, 0]
+
+export { GAME_STAGES, GAME_STAGES_TIME }
