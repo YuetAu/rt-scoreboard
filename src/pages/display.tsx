@@ -1,10 +1,12 @@
 import { GAME_STAGES, GAME_STAGES_TIME } from "@/common/gameStages";
 import { FirebaseDatabase } from "@/firebase/config";
-import { Box, Button, FormControl, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spacer, VStack, useDisclosure } from "@chakra-ui/react";
-import { time } from "console";
-import { ref, push, child, set, remove, get, update, onValue } from "firebase/database";
+import BlueSideDisplay from "@/props/BlueSideDisplay";
+import RedSideDisplay from "@/props/RedSideDisplay";
+import TimeDisplay from "@/props/TimeDisplay";
+import { Box, Button, Flex, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react";
+import { ref, child, set, get, update, onValue } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
-import { SetStateAction, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTimer } from "react-timer-and-stopwatch";
 
 export default function Display() {
@@ -129,66 +131,6 @@ export default function Display() {
         }
     }
 
-    const startClock = () => {
-        console.log("Clock Started")
-        timer.resumeTimer();
-        set(child(dbRef, `games/${gameID}/clock`), {
-            stage: gameStage,
-            timestamp: Date.now(),
-            elapsed: clockElapse.current,
-            paused: false
-        })
-    }
-
-    const stopClock = () => {
-        console.log("Clock Stopped")
-        timer.pauseTimer();
-        clockElapse.current += timer.timeElapsed;
-        set(child(dbRef, `games/${gameID}/clock`), {
-            stage: gameStage,
-            timestamp: Date.now(),
-            elapsed: clockElapse.current,
-            paused: true
-        })
-    }
-
-    const toggleClock = () => {
-        if (clockToggle.current) {
-            stopClock();
-            clockToggle.current = false;
-        } else {
-            startClock();
-            clockToggle.current = true;
-        }
-    }
-
-    const resetStage = () => {
-        timer.resetTimer({
-            create: {
-                timerWithDuration: {
-                    time: {
-                        seconds: GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage)],
-                    }
-                }
-            },
-            autoplay: false
-        });
-        set(child(dbRef, `games/${gameID}/clock`), {
-            stage: gameStage,
-            timestamp: Date.now(),
-            elapsed: 0,
-            paused: true
-        })
-    }
-
-    const changeStage = (skipStage:number) => {
-        if (GAME_STAGES.indexOf(gameStage)+skipStage < 0 ) return;
-        if (GAME_STAGES.indexOf(gameStage)+skipStage > GAME_STAGES.length-1 ) return;
-        const index = GAME_STAGES.indexOf(gameStage);
-        const nextStage = GAME_STAGES[index+skipStage];
-        forceNextStage.current = true;
-        setGameStage(nextStage);
-    }
 
     const gameIDInput = useRef<HTMLInputElement>(null);
     const [gameIDModal, setGameIDModal] = useState(true);
@@ -202,17 +144,33 @@ export default function Display() {
         }
     }
 
+    const [containerHeight, setContainerHeight] = useState(0);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setContainerHeight(window.innerHeight);
+        }
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, [])
+
     return (
         <>
-        <Box>
-            <h1>Game ID: {gameID}</h1>
-            <h1>Device ID: {deviceID}</h1>
-            <h1>Game Stage: {gameStage}</h1>
-            <h1>Time Left: {timer.timerText}</h1>
-            <Button onClick={toggleClock}>Toggle Timer</Button>
-            <Button onClick={resetStage}>Reset Timer</Button>
-            <Button onClick={()=>changeStage(1)}>Next Stage</Button>
-            <Button onClick={()=>changeStage(-1)}>Previous Stage</Button>
+        <Box style={{
+            height: containerHeight,
+            position: 'relative',
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'space-between',
+            //overflow: 'hidden',
+        }}>
+                <RedSideDisplay enTeamTitle={"Red Team"} zhTeamTitle={"紅組"} teamPoints={"0"}/>
+                <TimeDisplay timeText={timer.timerDisplayStrings}/>
+                <BlueSideDisplay enTeamTitle={"Blue Team"} zhTeamTitle={"藍組"} teamPoints={"0"}/>
+            
         </Box>
         <Modal isOpen={gameIDModal} onClose={()=>{}} isCentered>
             <ModalOverlay />

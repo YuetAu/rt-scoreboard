@@ -1,10 +1,9 @@
 import { GAME_STAGES, GAME_STAGES_TIME } from "@/common/gameStages";
 import { FirebaseDatabase } from "@/firebase/config";
-import { Box, Button, FormControl, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Spacer, VStack, useDisclosure } from "@chakra-ui/react";
-import { time } from "console";
-import { ref, push, child, set, remove, get, update, onValue } from "firebase/database";
+import { Box, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react";
+import { ref, child, set, get, update, onValue } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
-import { SetStateAction, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTimer } from "react-timer-and-stopwatch";
 
 export default function Dashboard() {
@@ -202,9 +201,36 @@ export default function Dashboard() {
         }
     }
 
+    const [containerHeight, setContainerHeight] = useState(0);
+    const heightEventListner = useRef(false);
+
+    useEffect(() => {
+        if (!heightEventListner.current) {
+            const handleResize = () => {
+                setContainerHeight(window.innerHeight);
+            }
+            handleResize();
+            window.addEventListener('resize', handleResize);
+            heightEventListner.current = true;
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
+    }, [])
+
     return (
         <>
-        <Box>
+        <Box style={{
+            height: containerHeight,
+            position: 'relative',
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'space-between',
+            //overflow: 'hidden',
+        }}>
+                
+        </Box>
+        {/* <Box>
             <h1>Game ID: {gameID}</h1>
             <h1>Device ID: {deviceID}</h1>
             <h1>Game Stage: {gameStage}</h1>
@@ -213,7 +239,7 @@ export default function Dashboard() {
             <Button onClick={resetStage}>Reset Timer</Button>
             <Button onClick={()=>changeStage(1)}>Next Stage</Button>
             <Button onClick={()=>changeStage(-1)}>Previous Stage</Button>
-        </Box>
+        </Box> */}
         <Modal isOpen={gameIDModal} onClose={()=>{}} isCentered>
             <ModalOverlay />
             <ModalContent>
