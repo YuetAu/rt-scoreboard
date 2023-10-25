@@ -31,12 +31,6 @@ export default function Dashboard() {
                     });
                     console.log("Game Fetched");
                     setClock(gameData.clock);
-                    onValue(child(dbRef, `games/${gameID}/status`), (snapshot) => {
-                        const status = snapshot.val();
-                        if (status) {
-                            setGameStatus(status);
-                        }
-                    });
                     onValue(child(dbRef, `games/${gameID}/clock`), (snapshot) => {
                         const clockData = snapshot.val();
                         if (clockData) {
@@ -78,6 +72,8 @@ export default function Dashboard() {
             }
             if (gameStage === "END") {
                 clockToggle.current = false;
+            } else {
+                clockToggle.current = true;
             }
             forceNextStage.current = false;
         }
