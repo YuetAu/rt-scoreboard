@@ -241,7 +241,14 @@ export default function Dashboard() {
                 position: 'absolute',
             }}>
                 {/** Clock Box */}
-                <TimerBox timeText={timer.timerDisplayStrings} />
+                <TimerBox 
+                    timeText={timer.timerDisplayStrings} 
+                    gameStage={gameStage} 
+                    clockToggle={clockToggle.current} 
+                    toggleClock={toggleClock} 
+                    resetStage={resetStage} 
+                    changeStage={changeStage}
+                />
             </Box>   
             <Box style={{
                 height: '80%',

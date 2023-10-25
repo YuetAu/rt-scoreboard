@@ -8,6 +8,16 @@ export default function FloatBox(props: any) {
         <>
         <Box boxShadow='lg' m={"4rem"} mb={"0.7rem"} rounded='md' bg='white' p={"0.4rem"} style={{
             fontFamily: "'Quicksand Variable', sans-serif",
+            fontSize: "1.2rem",
+            fontWeight: "700",
+            width: "12rem",
+            textAlign: "center",
+            backgroundColor: "#F9A825",
+        }}>
+            {props.gameStage}
+        </Box>
+        <Box boxShadow='lg' m={"4rem"} my={"0.7rem"} rounded='md' bg='white' p={"0.4rem"} style={{
+            fontFamily: "'Quicksand Variable', sans-serif",
             fontSize: "2rem",
             fontWeight: "700",
             width: "12rem",

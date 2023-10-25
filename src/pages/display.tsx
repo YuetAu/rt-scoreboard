@@ -1,4 +1,4 @@
-import { GAME_STAGES, GAME_STAGES_TIME } from "@/common/gameStages";
+import { GAME_STAGES, GAME_STAGES_TEXT, GAME_STAGES_TIME } from "@/common/gameStages";
 import { FirebaseDatabase } from "@/firebase/config";
 import BlueSideDisplay from "@/props/BlueSideDisplay";
 import FloatBox from "@/props/display/FloatBox";
@@ -165,7 +165,7 @@ export default function Display() {
             //width: '20rem',
             //overflow: 'hidden',
         }}>
-                <FloatBox timeText={timer.timerDisplayStrings} redTeamPoints={0} blueTeamPoints={0}/>
+                <FloatBox timeText={timer.timerDisplayStrings} redTeamPoints={0} blueTeamPoints={0} gameStage={GAME_STAGES_TEXT[GAME_STAGES.indexOf(gameStage)]}/>
         </Box>
         <Modal isOpen={false} onClose={()=>{}} isCentered>
             <ModalOverlay />
