@@ -182,6 +182,7 @@ export default function Dashboard() {
             elapsed: 0,
             paused: true
         })
+        clockToggle.current = false;
     }
 
     const changeStage = (skipStage:number) => {
