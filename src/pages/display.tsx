@@ -1,9 +1,6 @@
 import { GAME_STAGES, GAME_STAGES_TEXT, GAME_STAGES_TIME } from "@/common/gameStages";
 import { FirebaseDatabase } from "@/firebase/config";
-import BlueSideDisplay from "@/props/BlueSideDisplay";
 import FloatBox from "@/props/display/FloatBox";
-import RedSideDisplay from "@/props/RedSideDisplay";
-import TimeDisplay from "@/props/TimeDisplay";
 import { Box, Button, Flex, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react";
 import { ref, child, set, get, update, onValue } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
@@ -75,6 +72,8 @@ export default function Display() {
             }
             if (gameStage === "END") {
                 clockToggle.current = false;
+            } else {
+                clockToggle.current = true;
             }
             forceNextStage.current = false;
         }

@@ -73,6 +73,8 @@ export default function Dashboard() {
             }
             if (gameStage === "END") {
                 clockToggle.current = false;
+            } else {
+                clockToggle.current = true;
             }
             forceNextStage.current = false;
         }
