@@ -1,6 +1,7 @@
 import { GAME_STAGES, GAME_STAGES_TIME } from "@/common/gameStages";
 import { FirebaseDatabase } from "@/firebase/config";
 import BlueSideDisplay from "@/props/BlueSideDisplay";
+import FloatBox from "@/props/display/FloatBox";
 import RedSideDisplay from "@/props/RedSideDisplay";
 import TimeDisplay from "@/props/TimeDisplay";
 import { Box, Button, Flex, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react";
@@ -144,7 +145,7 @@ export default function Display() {
         }
     }
 
-    const [containerHeight, setContainerHeight] = useState(0);
+    /* const [containerHeight, setContainerHeight] = useState(0);
 
     useEffect(() => {
         const handleResize = () => {
@@ -155,24 +156,18 @@ export default function Display() {
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, [])
+    }, []) */
 
     return (
         <>
         <Box style={{
-            height: containerHeight,
-            position: 'relative',
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
+            //height: containerHeight,
+            //width: '20rem',
             //overflow: 'hidden',
         }}>
-                <RedSideDisplay enTeamTitle={"Red Team"} zhTeamTitle={"紅組"} teamPoints={"0"}/>
-                <TimeDisplay timeText={timer.timerDisplayStrings}/>
-                <BlueSideDisplay enTeamTitle={"Blue Team"} zhTeamTitle={"藍組"} teamPoints={"0"}/>
-            
+                <FloatBox timeText={timer.timerDisplayStrings} redTeamPoints={0} blueTeamPoints={0}/>
         </Box>
-        <Modal isOpen={gameIDModal} onClose={()=>{}} isCentered>
+        <Modal isOpen={false} onClose={()=>{}} isCentered>
             <ModalOverlay />
             <ModalContent>
             <ModalHeader>Connect to Game Room</ModalHeader>

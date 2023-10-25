@@ -5,6 +5,8 @@ import { ref, child, set, get, update, onValue } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
 import { useEffect, useRef, useState } from "react";
 import { useTimer } from "react-timer-and-stopwatch";
+import "@fontsource-variable/quicksand";
+import TimerBox from "@/props/dashboard/TimerBox";
 
 export default function Dashboard() {
 
@@ -222,13 +224,34 @@ export default function Dashboard() {
         <>
         <Box style={{
             height: containerHeight,
-            position: 'relative',
+            position: 'absolute',
             width: '100%',
             display: 'flex',
             justifyContent: 'space-between',
             //overflow: 'hidden',
+            backgroundColor: '#3A3B3C',
+            fontFamily: "'Quicksand Variable', sans-serif",
+            fontWeight: "700",
+            fontSize: "2rem",
+            color: 'white',
         }}>
-                
+            <Box style={{
+                height: '20%',
+                width: '100%',
+                position: 'absolute',
+            }}>
+                {/** Clock Box */}
+                <TimerBox timeText={timer.timerDisplayStrings} />
+            </Box>   
+            <Box style={{
+                height: '80%',
+                width: '100%',
+                top: '20%',
+                position: 'absolute',
+            }}>
+                {/** Game Control */}
+                Game Control
+            </Box>
         </Box>
         {/* <Box>
             <h1>Game ID: {gameID}</h1>
@@ -240,7 +263,7 @@ export default function Dashboard() {
             <Button onClick={()=>changeStage(1)}>Next Stage</Button>
             <Button onClick={()=>changeStage(-1)}>Previous Stage</Button>
         </Box> */}
-        <Modal isOpen={gameIDModal} onClose={()=>{}} isCentered>
+        <Modal isOpen={false} onClose={()=>{}} isCentered>
             <ModalOverlay />
             <ModalContent>
             <ModalHeader>Connect to Game Room</ModalHeader>
