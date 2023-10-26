@@ -1,5 +1,6 @@
 import { Box, SimpleGrid } from "@chakra-ui/react";
 import "@fontsource-variable/quicksand";
+import "@fontsource-variable/source-code-pro";
 
 
 export default function FloatBox(props: any) {
@@ -17,11 +18,11 @@ export default function FloatBox(props: any) {
             {props.gameStage}
         </Box>
         <Box boxShadow='lg' m={"4rem"} my={"0.7rem"} rounded='md' bg='white' p={"0.4rem"} style={{
-            fontFamily: "'Quicksand Variable', sans-serif",
             fontSize: "2rem",
-            fontWeight: "700",
             width: "12rem",
             textAlign: "center",
+            fontFamily: "'Source Code Pro Variable', sans-serif",
+            fontWeight: "600",
         }}>
             {time.minutes}:{time.seconds}.{time.milliseconds}
         </Box>

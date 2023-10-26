@@ -3,7 +3,7 @@ import { FirebaseDatabase } from "@/firebase/config";
 import { Box, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react";
 import { ref, child, set, get, update, onValue } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useTimer } from "react-timer-and-stopwatch";
 import "@fontsource-variable/quicksand";
 import TimerBox from "@/props/dashboard/TimerBox";
@@ -14,12 +14,13 @@ export default function Dashboard() {
 
     const [gameID, setGameID] = useState("");
     const [deviceID, setDeviceID] = useState("");
-    const [gameStage, setGameStage] = useState("PREP");
+    const gameStage = useRef("PREP");
+    const clockData = useRef({ stage: "PREP", timestamp: 0, elapsed: 0, paused: true });
+    const [clockText, setClockText] = useState({ minutes: "00", seconds: "00", milliseconds: "000" });
     const grandClock = useRef(false);
     const gameFetchLock = useRef(false);
     const clockElapse = useRef(0);
     const clockToggle = useRef(false);
-    const forceNextStage = useRef(false);
 
     useEffect(() => {
         if (gameID && !gameFetchLock.current) {
@@ -31,11 +32,19 @@ export default function Dashboard() {
                         device: { ...gameData.device, [deviceID]: "CONTROLLER" },
                     });
                     console.log("Game Fetched");
-                    setClock(gameData.clock);
+                    gameStage.current = gameData.clock.stage;
+                    clockElapse.current = gameData.clock.elapsed;
+                    clockToggle.current = !gameData.clock.paused;
+                    clockData.current = gameData.clock;
+                    updateClockText();
                     onValue(child(dbRef, `games/${gameID}/clock`), (snapshot) => {
-                        const clockData = snapshot.val();
-                        if (clockData) {
-                            setClock(clockData);
+                        const newClockData = snapshot.val();
+                        if (newClockData) {
+                            gameStage.current = newClockData.stage;
+                            clockElapse.current = newClockData.elapsed;
+                            clockToggle.current = !newClockData.paused;
+                            clockData.current = newClockData;
+                            updateClockText();
                         }
                     })
                 } else {
@@ -50,93 +59,66 @@ export default function Dashboard() {
         }
     }, [gameID])
 
-    useEffect(() => {
-        if (timer.timerIsFinished || forceNextStage.current) {
-            console.log(`Resetting Timer for ${gameStage}`);
-            timer.resetTimer({
-                create: {
-                    timerWithDuration: {
-                        time: {
-                            seconds: GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage)],
-                        }
-                    }
-                },
-                autoplay: true
-            });
-            if (grandClock.current || forceNextStage.current) {
-                set(child(dbRef, `games/${gameID}/clock`), {
-                    stage: gameStage,
-                    timestamp: Date.now(),
-                    elapsed: 0,
-                    paused: false
-                })
+    const updateClockText = () => {
+        const remainingTime = clockData.current.paused ? (GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage.current)]*1000)-clockData.current.elapsed : (GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage.current)]*1000)-clockData.current.elapsed-(Date.now()-clockData.current.timestamp);
+        if (remainingTime >= 0) { 
+            const minutes = Math.floor(remainingTime/60000)+"";
+            const seconds = Math.floor(remainingTime/1000%60)+"";
+            const milliseconds = remainingTime%1000+"";
+            setClockText({
+                minutes: minutes.length < 2 ? "0"+minutes : minutes,
+                seconds: seconds.length < 2 ? "0"+seconds : seconds,
+                milliseconds: milliseconds.length < 3 ? milliseconds.length < 2 ? "00"+milliseconds : "0"+milliseconds : milliseconds
+            })
+            if (clockToggle.current) {
+                setTimeout(() => {
+                    updateClockText();
+                }, 37);
             }
-            if (gameStage === "END") {
-                clockToggle.current = false;
-            } else {
-                clockToggle.current = true;
+        } else {
+            if (grandClock.current) {
+                if (GAME_STAGES.indexOf(gameStage.current)+1 < GAME_STAGES.length) {
+                    const newGameStage = GAME_STAGES[GAME_STAGES.indexOf(gameStage.current)+1];
+                    console.log(`Resetting Timer for ${newGameStage}`);
+                    const remainingTime = GAME_STAGES_TIME[GAME_STAGES.indexOf(newGameStage)]*1000;
+                    clockData.current = { stage: newGameStage, timestamp: Date.now(), elapsed: 0, paused: remainingTime > 0 ? false : true };
+                    updateClockText();
+                    gameStage.current = newGameStage;
+                    clockToggle.current = remainingTime > 0 ? true : false;
+                    clockElapse.current = 0;
+                    set(child(dbRef, `games/${gameID}/clock`), {
+                        stage: newGameStage,
+                        timestamp: Date.now(),
+                        elapsed: 0,
+                        paused: remainingTime > 0 ? false : true
+                    })
+                }
             }
-            forceNextStage.current = false;
         }
-    }, [gameStage])
+    }
+
 
     const createGame = () => {
         const newGameID = generateSlug(2);
         grandClock.current = true;
-        const newDeviceID = generateSlug(2)
+        const newDeviceID = generateSlug(2);
+        setDeviceID(newDeviceID);
         set(child(dbRef, `games/${newGameID}`), {
             createdAt: Date.now(),
-            device: { [newDeviceID]: "DISPLAY" },
-            clock: { stage: "PREP", timestamp: 0, elapsed: 0 }
+            device: {},
+            clock: { stage: "PREP", timestamp: 0, elapsed: 0, paused: true }
         });
         setGameID(newGameID);
         setGameIDModal(false);
     };
 
-    const timer = useTimer({
-        create: {
-            timerWithDuration: {
-                time: {
-                    minutes: 1,
-                }
-            }
-        },
-        includeMilliseconds: true,
-        intervalRate: 37,
-        autoplay: false,
-        callbacks: {
-            onFinish: () => {
-                const index = GAME_STAGES.indexOf(gameStage);
-                const nextStage = GAME_STAGES[index+1];
-                setGameStage(nextStage);
-            },
-        }
-    });
-
-    const setClock = (clockData: any) => {
-        if (clockData.timestamp != 0) {
-            console.log("Updating Clock")
-            setGameStage(clockData.stage);
-            clockToggle.current = !clockData.paused;
-            clockElapse.current = clockData.elapsed;
-            timer.resetTimer({
-                create: {
-                    timerWithDuration: {
-                        time: {
-                            milliseconds: clockData.paused ? (GAME_STAGES_TIME[GAME_STAGES.indexOf(clockData.stage)]*1000)-clockData.elapsed : (GAME_STAGES_TIME[GAME_STAGES.indexOf(clockData.stage)]*1000)-clockData.elapsed-(Date.now()-clockData.timestamp),
-                        }
-                    }
-                },
-                autoplay: clockData.paused ? false : true
-            });
-        }
-    }
-
     const startClock = () => {
         console.log("Clock Started")
-        timer.resumeTimer();
+        clockToggle.current = true;
+        clockData.current = { stage: gameStage.current, elapsed: clockElapse.current, paused: false, timestamp: Date.now() };
+        updateClockText();
         set(child(dbRef, `games/${gameID}/clock`), {
-            stage: gameStage,
+            stage: gameStage.current,
             timestamp: Date.now(),
             elapsed: clockElapse.current,
             paused: false
@@ -145,10 +127,12 @@ export default function Dashboard() {
 
     const stopClock = () => {
         console.log("Clock Stopped")
-        timer.pauseTimer();
-        clockElapse.current += timer.timeElapsed;
+        clockToggle.current = false;
+        clockElapse.current += Date.now()-clockData.current.timestamp;
+        clockData.current = { stage: gameStage.current, elapsed: clockElapse.current, paused: true, timestamp: Date.now() };
+        updateClockText();
         set(child(dbRef, `games/${gameID}/clock`), {
-            stage: gameStage,
+            stage: gameStage.current,
             timestamp: Date.now(),
             elapsed: clockElapse.current,
             paused: true
@@ -158,40 +142,43 @@ export default function Dashboard() {
     const toggleClock = () => {
         if (clockToggle.current) {
             stopClock();
-            clockToggle.current = false;
         } else {
             startClock();
-            clockToggle.current = true;
         }
     }
 
     const resetStage = () => {
-        timer.resetTimer({
-            create: {
-                timerWithDuration: {
-                    time: {
-                        seconds: GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage)],
-                    }
-                }
-            },
-            autoplay: false
-        });
+        stopClock();
+        console.log("Reset Stage Time")
+        clockToggle.current = false;
+        clockElapse.current = 0;
+        clockData.current = { stage: gameStage.current, paused: true, elapsed: 0, timestamp: Date.now() };
+        updateClockText();
         set(child(dbRef, `games/${gameID}/clock`), {
-            stage: gameStage,
+            stage: gameStage.current,
             timestamp: Date.now(),
             elapsed: 0,
             paused: true
         })
-        clockToggle.current = false;
     }
 
     const changeStage = (skipStage:number) => {
-        if (GAME_STAGES.indexOf(gameStage)+skipStage < 0 ) return;
-        if (GAME_STAGES.indexOf(gameStage)+skipStage > GAME_STAGES.length-1 ) return;
-        const index = GAME_STAGES.indexOf(gameStage);
+        if (GAME_STAGES.indexOf(gameStage.current)+skipStage < 0 ) return;
+        if (GAME_STAGES.indexOf(gameStage.current)+skipStage > GAME_STAGES.length-1 ) return;
+        const index = GAME_STAGES.indexOf(gameStage.current);
         const nextStage = GAME_STAGES[index+skipStage];
-        forceNextStage.current = true;
-        setGameStage(nextStage);
+        const remainingTime = GAME_STAGES_TIME[index+skipStage]*1000;
+        gameStage.current = nextStage;
+        clockToggle.current = remainingTime > 0 ? true : false;
+        clockElapse.current = 0;
+        clockData.current = { stage: nextStage, timestamp: Date.now(), elapsed: 0, paused: remainingTime > 0 ? false : true };
+        updateClockText();
+        set(child(dbRef, `games/${gameID}/clock`), {
+            stage: nextStage,
+            timestamp: Date.now(),
+            elapsed: 0,
+            paused: remainingTime > 0 ? false : true
+        })
     }
 
     const gameIDInput = useRef<HTMLInputElement>(null);
@@ -203,6 +190,7 @@ export default function Dashboard() {
             setDeviceID(generateSlug(2));
             setGameID(gameIDInput.current.value);
             setGameIDModal(false);
+            updateClockText();
         }
     }
 
@@ -245,8 +233,8 @@ export default function Dashboard() {
             }}>
                 {/** Clock Box */}
                 <TimerBox 
-                    timeText={timer.timerDisplayStrings} 
-                    gameStage={gameStage} 
+                    timeText={clockText} 
+                    gameStage={gameStage.current} 
                     clockToggle={clockToggle.current} 
                     toggleClock={toggleClock} 
                     resetStage={resetStage} 
@@ -261,19 +249,12 @@ export default function Dashboard() {
             }}>
                 {/** Game Control */}
                 Game Control
+                <br/>
+                {gameID}
+                <br/>
             </Box>
         </Box>
-        {/* <Box>
-            <h1>Game ID: {gameID}</h1>
-            <h1>Device ID: {deviceID}</h1>
-            <h1>Game Stage: {gameStage}</h1>
-            <h1>Time Left: {timer.timerText}</h1>
-            <Button onClick={toggleClock}>Toggle Timer</Button>
-            <Button onClick={resetStage}>Reset Timer</Button>
-            <Button onClick={()=>changeStage(1)}>Next Stage</Button>
-            <Button onClick={()=>changeStage(-1)}>Previous Stage</Button>
-        </Box> */}
-        <Modal isOpen={false} onClose={()=>{}} isCentered>
+        <Modal isOpen={gameIDModal} onClose={()=>{}} isCentered>
             <ModalOverlay />
             <ModalContent>
             <ModalHeader>Connect to Game Room</ModalHeader>

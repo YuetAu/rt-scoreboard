@@ -1,5 +1,5 @@
 import { Box, Button, ButtonGroup } from "@chakra-ui/react";
-
+import "@fontsource-variable/source-code-pro";
 
 export default function TimerBox(props: any) {
     const time = props.timeText;
@@ -22,8 +22,10 @@ export default function TimerBox(props: any) {
             fontSize: "5rem",
             textAlign: "center",
             height: "6rem",
+            fontFamily: "'Source Code Pro Variable', sans-serif",
+            fontWeight: "600",
         }}>
-        {time.minutes}:{time.seconds}.{time.milliseconds}
+            {time.minutes}:{time.seconds}.{time.milliseconds}
         </Box>
         <Box style={{
             position: "relative",
