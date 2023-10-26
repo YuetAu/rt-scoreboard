@@ -1,6 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -16,5 +18,13 @@ const firebaseConfig = {
 // Initialize Firebase
 const FirebaseApp = initializeApp(firebaseConfig);
 const FirebaseDatabase = getDatabase(FirebaseApp);
+
+const appCheck = initializeAppCheck(FirebaseApp, {
+    provider: new ReCaptchaV3Provider('6LencZcUAAAAAD-qGrshY_Hj4RgcfPqBA4IpE4FD'),
+  
+    // Optional argument. If true, the SDK automatically refreshes App Check
+    // tokens as needed.
+    isTokenAutoRefreshEnabled: true
+});
 
 export { FirebaseApp, FirebaseDatabase };
