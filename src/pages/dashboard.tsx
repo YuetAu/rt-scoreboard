@@ -1,11 +1,12 @@
 import { GAME_STAGES, GAME_STAGES_TIME } from "@/common/gameStages";
 import { FirebaseDatabase } from "@/firebase/config";
-import { Box, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react";
+import { Box, Button, Image, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react";
 import { ref, child, set, get, update, onValue } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
 import { useEffect, useRef, useState } from "react";
 import "@fontsource-variable/quicksand";
 import TimerBox from "@/props/dashboard/TimerBox";
+import { HoriztonalCounter, VerticalCounter } from "@/props/dashboard/Counter";
 
 export default function Dashboard() {
 
@@ -210,6 +211,18 @@ export default function Dashboard() {
         }
     }, [])
 
+    // Game Props
+    const [redAutoRobotTask, setRedAutoRobotTask] = useState("0");
+    const [blueAutoRobotTask, setBlueAutoRobotTask] = useState(0);
+    const [redUpperSidePlantingZone, setRedUpperSidePlantingZone] = useState(0);
+    const [redLowerSidePlantingZone, setRedLowerSidePlantingZone] = useState(0);
+    const [blueUpperSidePlantingZone, setBlueUpperSidePlantingZone] = useState(0);
+    const [blueLowerSidePlantingZone, setBlueLowerSidePlantingZone] = useState(0);
+    const [redColouredPlantingZone, setRedColouredPlantingZone] = useState(0);
+    const [blueColouredPlantingZone, setBlueColouredPlantingZone] = useState(0);
+    const [redCenterPlantingZone, setRedCenterPlantingZone] = useState(0);
+    const [blueCenterPlantingZone, setBlueCenterPlantingZone] = useState(0);
+
     return (
         <>
         <Box style={{
@@ -226,6 +239,12 @@ export default function Dashboard() {
             color: 'white',
         }}>
             <Box style={{
+                fontSize: '1.3rem',
+                margin: '1rem',
+            }}>
+            GameID: {gameID}
+            </Box>
+            <Box style={{
                 height: '20%',
                 width: '100%',
                 position: 'absolute',
@@ -241,16 +260,122 @@ export default function Dashboard() {
                 />
             </Box>   
             <Box style={{
-                height: '80%',
+                height: '75%',
                 width: '100%',
-                top: '20%',
+                top: '25%',
                 position: 'absolute',
             }}>
-                {/** Game Control */}
-                Game Control
-                <br/>
-                {gameID}
-                <br/>
+                <Box style={{
+                    height: '95%',
+                    width: '100%',
+                    zIndex: 1,
+                }}>
+                    <Image src="/GameField.png" alt="Logo" style={{
+                        height: '100%',
+                        width: '100%',
+                        objectFit: 'contain',
+                    }}/>
+                </Box>
+                <Box style={{
+                    height: '10%',
+                    width: '10%',
+                    left: '39.2%',
+                    top: '3%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <HoriztonalCounter counter={redAutoRobotTask} setCounter={setRedAutoRobotTask} />
+                </Box>
+                <Box style={{
+                    height: '10%',
+                    width: '10%',
+                    left: '52.2%',
+                    top: '3%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <HoriztonalCounter counter={blueAutoRobotTask} setCounter={setBlueAutoRobotTask} />
+                </Box>
+                <Box style={{
+                    height: '10%',
+                    width: '10%',
+                    left: '35.5%',
+                    top: '85%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <HoriztonalCounter counter={redColouredPlantingZone} setCounter={setRedColouredPlantingZone} />
+                </Box>
+                <Box style={{
+                    height: '10%',
+                    width: '10%',
+                    left: '55.5%',
+                    top: '85%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <HoriztonalCounter counter={blueColouredPlantingZone} setCounter={setBlueColouredPlantingZone} />
+                </Box>
+                <Box style={{
+                    height: '10%',
+                    width: '10%',
+                    left: '46%',
+                    top: '66%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <VerticalCounter counter={redLowerSidePlantingZone} setCounter={setRedLowerSidePlantingZone} />
+                </Box>
+                <Box style={{
+                    height: '10%',
+                    width: '10%',
+                    left: '51.5%',
+                    top: '66%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <VerticalCounter counter={blueLowerSidePlantingZone} setCounter={setBlueLowerSidePlantingZone} />
+                </Box>
+                <Box style={{
+                    height: '10%',
+                    width: '10%',
+                    left: '46%',
+                    top: '14.5%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <VerticalCounter counter={redUpperSidePlantingZone} setCounter={setRedUpperSidePlantingZone} />
+                </Box>
+                <Box style={{
+                    height: '10%',
+                    width: '10%',
+                    left: '51.5%',
+                    top: '14.5%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <VerticalCounter counter={blueUpperSidePlantingZone} setCounter={setBlueUpperSidePlantingZone} />
+                </Box>
+                <Box style={{
+                    height: '10%',
+                    width: '10%',
+                    left: '45%',
+                    top: '40%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <VerticalCounter counter={redCenterPlantingZone} setCounter={setRedCenterPlantingZone} />
+                </Box>
+                <Box style={{
+                    height: '10%',
+                    width: '10%',
+                    left: '52.2%',
+                    top: '40%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <VerticalCounter counter={blueCenterPlantingZone} setCounter={setBlueCenterPlantingZone} />
+                </Box>
             </Box>
         </Box>
         <Modal isOpen={gameIDModal} onClose={()=>{}} isCentered>
