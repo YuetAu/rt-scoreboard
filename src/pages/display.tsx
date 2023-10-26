@@ -5,7 +5,6 @@ import { Box, Button, Flex, Input, Modal, ModalBody, ModalContent, ModalFooter, 
 import { ref, child, set, get, update, onValue } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
 import { useEffect, useRef, useState } from "react";
-import { useTimer } from "react-timer-and-stopwatch";
 
 export default function Display() {
 

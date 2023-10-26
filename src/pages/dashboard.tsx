@@ -3,8 +3,7 @@ import { FirebaseDatabase } from "@/firebase/config";
 import { Box, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react";
 import { ref, child, set, get, update, onValue } from "firebase/database";
 import { generateSlug } from "random-word-slugs";
-import { use, useEffect, useRef, useState } from "react";
-import { useTimer } from "react-timer-and-stopwatch";
+import { useEffect, useRef, useState } from "react";
 import "@fontsource-variable/quicksand";
 import TimerBox from "@/props/dashboard/TimerBox";
 
