@@ -16,9 +16,8 @@ Run the development server
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 
-## Synced Clock
+## Synced Timer
 
-Please be reminded that due to interent latency, clocks may be out of sync from each other.
+Timer is now synced by starting timestamp.
 
-Connect all Display and Controller before starting the game to ensure that all clocks are synced.
-
+Please keep your device have the correct time by enabling NTP service to `stdtime.gov.hk` or `time.cloudflare.com`.
