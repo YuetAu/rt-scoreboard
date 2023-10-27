@@ -6,7 +6,7 @@ import { generateSlug } from "random-word-slugs";
 import { useEffect, useRef, useState } from "react";
 import "@fontsource-variable/quicksand";
 import TimerBox from "@/props/dashboard/TimerBox";
-import { HoriztonalCounter, VerticalCounter } from "@/props/dashboard/Counter";
+import { Counter } from "@/props/dashboard/Counter";
 
 export default function Dashboard() {
 
@@ -48,30 +48,11 @@ export default function Dashboard() {
                         }
                     })
 
-                    setRedAutoRobotTask(gameData.props.redAutoRobotTask);
-                    setBlueAutoRobotTask(gameData.props.blueAutoRobotTask);
-                    setRedUpperSidePlantingZone(gameData.props.redUpperSidePlantingZone);
-                    setRedLowerSidePlantingZone(gameData.props.redLowerSidePlantingZone);
-                    setBlueUpperSidePlantingZone(gameData.props.blueUpperSidePlantingZone);
-                    setBlueLowerSidePlantingZone(gameData.props.blueLowerSidePlantingZone);
-                    setRedColouredPlantingZone(gameData.props.redColouredPlantingZone);
-                    setBlueColouredPlantingZone(gameData.props.blueColouredPlantingZone);
-                    setRedCenterPlantingZone(gameData.props.redCenterPlantingZone);
-                    setBlueCenterPlantingZone(gameData.props.blueCenterPlantingZone);
-
+                    if (gameData.props) updateGameProps(gameData.props);
                     onValue(child(dbRef, `games/${gameID}/props`), (snapshot) => {
                         const newPropsData = snapshot.val();
                         if (newPropsData) {
-                            setRedAutoRobotTask(newPropsData.redAutoRobotTask);
-                            setBlueAutoRobotTask(newPropsData.blueAutoRobotTask);
-                            setRedUpperSidePlantingZone(newPropsData.redUpperSidePlantingZone);
-                            setRedLowerSidePlantingZone(newPropsData.redLowerSidePlantingZone);
-                            setBlueUpperSidePlantingZone(newPropsData.blueUpperSidePlantingZone);
-                            setBlueLowerSidePlantingZone(newPropsData.blueLowerSidePlantingZone);
-                            setRedColouredPlantingZone(newPropsData.redColouredPlantingZone);
-                            setBlueColouredPlantingZone(newPropsData.blueColouredPlantingZone);
-                            setRedCenterPlantingZone(newPropsData.redCenterPlantingZone);
-                            setBlueCenterPlantingZone(newPropsData.blueCenterPlantingZone);
+                            updateGameProps(newPropsData);
                         }
                     });
 
@@ -86,6 +67,32 @@ export default function Dashboard() {
             });
         }
     }, [gameID])
+
+    const updateGameProps = (gameProps: any) => {
+        setRedAutoRobotTask(gameProps.redAutoRobotTask);
+        setBlueAutoRobotTask(gameProps.blueAutoRobotTask);
+        setRedUpperSidePlantingZone(gameProps.redUpperSidePlantingZone);
+        setRedLowerSidePlantingZone(gameProps.redLowerSidePlantingZone);
+        setBlueUpperSidePlantingZone(gameProps.blueUpperSidePlantingZone);
+        setBlueLowerSidePlantingZone(gameProps.blueLowerSidePlantingZone);
+        setRedColouredPlantingZone(gameProps.redColouredPlantingZone);
+        setBlueColouredPlantingZone(gameProps.blueColouredPlantingZone);
+        setRedCenterPlantingZone(gameProps.redCenterPlantingZone);
+        setBlueCenterPlantingZone(gameProps.blueCenterPlantingZone);
+        setRedCenterGoldenPlantingZone(gameProps.redCenterGoldenPlantingZone);
+        setBlueCenterGoldenPlantingZone(gameProps.blueCenterGoldenPlantingZone);
+        setRedUpperSideGoldenPlantingZone(gameProps.redUpperSideGoldenPlantingZone);
+        setBlueUpperSideGoldenPlantingZone(gameProps.blueUpperSideGoldenPlantingZone);
+        setRedLowerSideGoldenPlantingZone(gameProps.redLowerSideGoldenPlantingZone);
+        setBlueLowerSideGoldenPlantingZone(gameProps.blueLowerSideGoldenPlantingZone);
+        setRedColouredGoldenPlantingZone(gameProps.redColouredGoldenPlantingZone);
+        setBlueColouredGoldenPlantingZone(gameProps.blueColouredGoldenPlantingZone);
+        setRedAutoRobotRecogn(gameProps.redAutoRobotRecogn);
+        setBlueAutoRobotRecogn(gameProps.blueAutoRobotRecogn);
+        setRedAutoRobotMove(gameProps.redAutoRobotMove);    
+        setBlueAutoRobotMove(gameProps.blueAutoRobotMove);
+        setGameScore(gameProps.scores);
+    }
 
     const updateClockText = () => {
         const remainingTime = clockData.current.paused ? (GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage.current)]*1000)-clockData.current.elapsed : (GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage.current)]*1000)-clockData.current.elapsed-(Date.now()-clockData.current.timestamp);
@@ -251,6 +258,46 @@ export default function Dashboard() {
     const [blueColouredPlantingZone, setBlueColouredPlantingZone] = useState(0);
     const [redCenterPlantingZone, setRedCenterPlantingZone] = useState(0);
     const [blueCenterPlantingZone, setBlueCenterPlantingZone] = useState(0);
+    const [redCenterGoldenPlantingZone, setRedCenterGoldenPlantingZone] = useState(0);
+    const [blueCenterGoldenPlantingZone, setBlueCenterGoldenPlantingZone] = useState(0);
+    const [redUpperSideGoldenPlantingZone, setRedUpperSideGoldenPlantingZone] = useState(0);
+    const [blueUpperSideGoldenPlantingZone, setBlueUpperSideGoldenPlantingZone] = useState(0);
+    const [redLowerSideGoldenPlantingZone, setRedLowerSideGoldenPlantingZone] = useState(0);
+    const [blueLowerSideGoldenPlantingZone, setBlueLowerSideGoldenPlantingZone] = useState(0);
+    const [redColouredGoldenPlantingZone, setRedColouredGoldenPlantingZone] = useState(0);
+    const [blueColouredGoldenPlantingZone, setBlueColouredGoldenPlantingZone] = useState(0);
+    const [redAutoRobotRecogn, setRedAutoRobotRecogn] = useState(0);
+    const [blueAutoRobotRecogn, setBlueAutoRobotRecogn] = useState(0);
+    const [redAutoRobotMove, setRedAutoRobotMove] = useState(0);
+    const [blueAutoRobotMove, setBlueAutoRobotMove] = useState(0);
+
+    const [gameScore, setGameScore] = useState({ red: 0, blue: 0, redOccoupyingZone: 0, blueOccoupyingZone: 0, redPlacedSeedlings: 0, bluePlacedSeedlings: 0, redGreatVictory: false, blueGreatVictory: false });
+    const gameProps = useRef<any>({});
+
+    const resetProps = () => {
+        setRedAutoRobotTask(0);
+        setBlueAutoRobotTask(0);
+        setRedUpperSidePlantingZone(0);
+        setRedLowerSidePlantingZone(0);
+        setBlueUpperSidePlantingZone(0);
+        setBlueLowerSidePlantingZone(0);
+        setRedColouredPlantingZone(0);
+        setBlueColouredPlantingZone(0);
+        setRedCenterPlantingZone(0);
+        setBlueCenterPlantingZone(0);
+        setRedCenterGoldenPlantingZone(0);
+        setBlueCenterGoldenPlantingZone(0);
+        setRedUpperSideGoldenPlantingZone(0);
+        setBlueUpperSideGoldenPlantingZone(0);
+        setRedLowerSideGoldenPlantingZone(0);
+        setBlueLowerSideGoldenPlantingZone(0);
+        setRedColouredGoldenPlantingZone(0);
+        setBlueColouredGoldenPlantingZone(0);
+        setRedAutoRobotRecogn(0);
+        setBlueAutoRobotRecogn(0);
+        setRedAutoRobotMove(0);
+        setBlueAutoRobotMove(0);
+    }
 
     useEffect(() => {
         console.log("Updating Props")
@@ -259,22 +306,149 @@ export default function Dashboard() {
         if (redAutoRobotTask > 2) {setRedAutoRobotTask(2); return;}
         if (blueAutoRobotTask > 2) {setBlueAutoRobotTask(2); return;}
 
-
-        if (gameID) {
-            set(child(dbRef, `games/${gameID}/props`), {
-                redAutoRobotTask: redAutoRobotTask,
-                blueAutoRobotTask: blueAutoRobotTask,
-                redUpperSidePlantingZone: redUpperSidePlantingZone,
-                redLowerSidePlantingZone: redLowerSidePlantingZone,
-                blueUpperSidePlantingZone: blueUpperSidePlantingZone,
-                blueLowerSidePlantingZone: blueLowerSidePlantingZone,
-                redColouredPlantingZone: redColouredPlantingZone,
-                blueColouredPlantingZone: blueColouredPlantingZone,
-                redCenterPlantingZone: redCenterPlantingZone,
-                blueCenterPlantingZone: blueCenterPlantingZone,
-            });
+        if (redUpperSidePlantingZone+redCenterPlantingZone+redLowerSidePlantingZone+redColouredPlantingZone > 9) {
+            if (redUpperSidePlantingZone > gameProps.current.redUpperSidePlantingZone) {setRedUpperSidePlantingZone(gameProps.current.redUpperSidePlantingZone); return;}
+            if (redCenterPlantingZone > gameProps.current.redCenterPlantingZone) {setRedCenterPlantingZone(gameProps.current.redCenterPlantingZone); return;}
+            if (redLowerSidePlantingZone > gameProps.current.redLowerSidePlantingZone) {setRedLowerSidePlantingZone(gameProps.current.redLowerSidePlantingZone); return;}
+            if (redColouredPlantingZone > gameProps.current.redColouredPlantingZone) {setRedColouredPlantingZone(gameProps.current.redColouredPlantingZone); return;}
         }
-    }, [redAutoRobotTask, blueAutoRobotTask, redUpperSidePlantingZone, redLowerSidePlantingZone, blueUpperSidePlantingZone, blueLowerSidePlantingZone, redColouredPlantingZone, blueColouredPlantingZone, redCenterPlantingZone, blueCenterPlantingZone])
+
+
+        if (blueUpperSidePlantingZone+blueCenterPlantingZone+blueLowerSidePlantingZone+blueColouredPlantingZone > 9) {
+            if (blueUpperSidePlantingZone > gameProps.current.blueUpperSidePlantingZone) {setBlueUpperSidePlantingZone(gameProps.current.blueUpperSidePlantingZone); return;}
+            if (blueCenterPlantingZone > gameProps.current.blueCenterPlantingZone) {setBlueCenterPlantingZone(gameProps.current.blueCenterPlantingZone); return;}
+            if (blueLowerSidePlantingZone > gameProps.current.blueLowerSidePlantingZone) {setBlueLowerSidePlantingZone(gameProps.current.blueLowerSidePlantingZone); return;}
+            if (blueColouredPlantingZone > gameProps.current.blueColouredPlantingZone) {setBlueColouredPlantingZone(gameProps.current.blueColouredPlantingZone); return;}
+        }
+
+
+        if (redUpperSideGoldenPlantingZone+redCenterGoldenPlantingZone+redLowerSideGoldenPlantingZone+redColouredGoldenPlantingZone > 3) {
+            if (redUpperSideGoldenPlantingZone > gameProps.current.redUpperSideGoldenPlantingZone) {setRedUpperSideGoldenPlantingZone(gameProps.current.redUpperSideGoldenPlantingZone); return;}
+            if (redCenterGoldenPlantingZone > gameProps.current.redCenterGoldenPlantingZone) {setRedCenterGoldenPlantingZone(gameProps.current.redCenterGoldenPlantingZone); return;}
+            if (redLowerSideGoldenPlantingZone > gameProps.current.redLowerSideGoldenPlantingZone) {setRedLowerSideGoldenPlantingZone(gameProps.current.redLowerSideGoldenPlantingZone); return;}
+            if (redColouredGoldenPlantingZone > gameProps.current.redColouredGoldenPlantingZone) {setRedColouredGoldenPlantingZone(gameProps.current.redColouredGoldenPlantingZone); return;}
+        }
+
+
+        if (blueUpperSideGoldenPlantingZone+blueCenterGoldenPlantingZone+blueLowerSideGoldenPlantingZone+blueColouredGoldenPlantingZone > 3) {
+            if (blueUpperSideGoldenPlantingZone > gameProps.current.blueUpperSideGoldenPlantingZone) {setBlueUpperSideGoldenPlantingZone(gameProps.current.blueUpperSideGoldenPlantingZone); return;}
+            if (blueCenterGoldenPlantingZone > gameProps.current.blueCenterGoldenPlantingZone) {setBlueCenterGoldenPlantingZone(gameProps.current.blueCenterGoldenPlantingZone); return;}
+            if (blueLowerSideGoldenPlantingZone > gameProps.current.blueLowerSideGoldenPlantingZone) {setBlueLowerSideGoldenPlantingZone(gameProps.current.blueLowerSideGoldenPlantingZone); return;}
+            if (blueColouredGoldenPlantingZone > gameProps.current.blueColouredGoldenPlantingZone) {setBlueColouredGoldenPlantingZone(gameProps.current.blueColouredGoldenPlantingZone); return;}
+        }
+
+        // Calculate the marks
+        var redPoints = 0;
+        if (redAutoRobotRecogn == 1) redPoints += 30; // 2.5.2.1
+        if (redAutoRobotTask == 2 && redAutoRobotMove == 1) redPoints += 50; // 2.5.2.2
+        if (redAutoRobotTask == 2 && redAutoRobotMove == 0) redPoints += 25; // 2.5.2.2 NOTE
+        redPoints += redColouredPlantingZone * 10; // 2.5.1.1
+        redPoints += (redUpperSidePlantingZone+redLowerSidePlantingZone) * 15; // 2.5.1.2
+        redPoints += redCenterPlantingZone * 20; // 2.5.1.3
+        redPoints += redColouredGoldenPlantingZone * 20; // 2.5.1.4
+        redPoints += (redUpperSideGoldenPlantingZone+redLowerSideGoldenPlantingZone) * 30; // 2.5.1.5
+        redPoints += redCenterGoldenPlantingZone * 40; // 2.5.1.6
+
+        var bluePoints = 0;
+        if (blueAutoRobotRecogn == 1) bluePoints += 30; // 2.5.2.1
+        if (blueAutoRobotTask == 2 && blueAutoRobotMove == 1) bluePoints += 50; // 2.5.2.2
+        if (blueAutoRobotTask == 2 && blueAutoRobotMove == 0) bluePoints += 25; // 2.5.2.2 NOTE
+        bluePoints += blueColouredPlantingZone * 10; // 2.5.1.1
+        bluePoints += (blueUpperSidePlantingZone+blueLowerSidePlantingZone) * 15; // 2.5.1.2
+        bluePoints += blueCenterPlantingZone * 20; // 2.5.1.3
+        bluePoints += blueColouredGoldenPlantingZone * 20; // 2.5.1.4
+        bluePoints += (blueUpperSideGoldenPlantingZone+blueLowerSideGoldenPlantingZone) * 30; // 2.5.1.5
+        bluePoints += blueCenterGoldenPlantingZone * 40; // 2.5.1.6
+
+        var redGreatVictory = false;
+        var blueGreatVictory = false;
+        var redOccoupyingZone = 0;
+        var blueOccoupyingZone = 0;
+        const redPlacedSeedlings = redUpperSidePlantingZone+redCenterPlantingZone+redLowerSidePlantingZone+redColouredPlantingZone+redUpperSideGoldenPlantingZone+redCenterGoldenPlantingZone+redLowerSideGoldenPlantingZone+redColouredGoldenPlantingZone;
+        const bluePlacedSeedlings = blueUpperSidePlantingZone+blueCenterPlantingZone+blueLowerSidePlantingZone+blueColouredPlantingZone+blueUpperSideGoldenPlantingZone+blueCenterGoldenPlantingZone+blueLowerSideGoldenPlantingZone+blueColouredGoldenPlantingZone;
+        if ((redUpperSidePlantingZone+redUpperSideGoldenPlantingZone) > (blueUpperSidePlantingZone+blueUpperSideGoldenPlantingZone)) {
+            redOccoupyingZone += 1;
+        } else if ((redUpperSidePlantingZone+redUpperSideGoldenPlantingZone) < (blueUpperSidePlantingZone+blueUpperSideGoldenPlantingZone)) {
+            blueOccoupyingZone += 1;
+        }
+
+        if ((redCenterPlantingZone+redCenterGoldenPlantingZone) > (blueCenterPlantingZone+blueCenterGoldenPlantingZone)) {
+            redOccoupyingZone += 1;
+        } else if ((redCenterPlantingZone+redCenterGoldenPlantingZone) < (blueCenterPlantingZone+blueCenterGoldenPlantingZone)) {
+            blueOccoupyingZone += 1;
+        }
+
+        if ((redLowerSidePlantingZone+redLowerSideGoldenPlantingZone) > (blueLowerSidePlantingZone+blueLowerSideGoldenPlantingZone)) {
+            redOccoupyingZone += 1;
+        } else if ((redLowerSidePlantingZone+redLowerSideGoldenPlantingZone) < (blueLowerSidePlantingZone+blueLowerSideGoldenPlantingZone)) {
+            blueOccoupyingZone += 1;
+        }
+
+        if ((redColouredPlantingZone+redColouredGoldenPlantingZone) > (blueColouredPlantingZone+blueColouredGoldenPlantingZone)) {
+            redOccoupyingZone += 1;
+        } else if ((redColouredPlantingZone+redColouredGoldenPlantingZone) < (blueColouredPlantingZone+blueColouredGoldenPlantingZone)) {
+            blueOccoupyingZone += 1;
+        }
+
+        if (redOccoupyingZone == 4 && redPlacedSeedlings > 5) {
+            redGreatVictory = true;
+            stopClock();
+        }
+
+        if (blueOccoupyingZone == 4 && bluePlacedSeedlings > 5) {
+            blueGreatVictory = true;
+            stopClock();
+        }
+
+
+        gameProps.current = {
+            redAutoRobotTask: redAutoRobotTask,
+            blueAutoRobotTask: blueAutoRobotTask,
+            redUpperSidePlantingZone: redUpperSidePlantingZone,
+            redLowerSidePlantingZone: redLowerSidePlantingZone,
+            blueUpperSidePlantingZone: blueUpperSidePlantingZone,
+            blueLowerSidePlantingZone: blueLowerSidePlantingZone,
+            redColouredPlantingZone: redColouredPlantingZone,
+            blueColouredPlantingZone: blueColouredPlantingZone,
+            redCenterPlantingZone: redCenterPlantingZone,
+            blueCenterPlantingZone: blueCenterPlantingZone,
+            redCenterGoldenPlantingZone: redCenterGoldenPlantingZone,
+            blueCenterGoldenPlantingZone: blueCenterGoldenPlantingZone,
+            redUpperSideGoldenPlantingZone: redUpperSideGoldenPlantingZone,
+            blueUpperSideGoldenPlantingZone: blueUpperSideGoldenPlantingZone,
+            redLowerSideGoldenPlantingZone: redLowerSideGoldenPlantingZone,
+            blueLowerSideGoldenPlantingZone: blueLowerSideGoldenPlantingZone,
+            redColouredGoldenPlantingZone: redColouredGoldenPlantingZone,
+            blueColouredGoldenPlantingZone: blueColouredGoldenPlantingZone,
+            redAutoRobotRecogn: redAutoRobotRecogn,
+            blueAutoRobotRecogn: blueAutoRobotRecogn,
+            redAutoRobotMove: redAutoRobotMove,
+            blueAutoRobotMove: blueAutoRobotMove,
+            scores: {
+                red: redPoints,
+                blue: bluePoints,
+                redOccoupyingZone: redOccoupyingZone,
+                blueOccoupyingZone: blueOccoupyingZone,
+                redPlacedSeedlings: redPlacedSeedlings,
+                bluePlacedSeedlings: bluePlacedSeedlings,
+                redGreatVictory: redGreatVictory,
+                blueGreatVictory: blueGreatVictory,
+            }
+        }
+
+        set(child(dbRef, `games/${gameID}/props`), gameProps.current);
+    }, [redAutoRobotTask, blueAutoRobotTask, 
+        redUpperSidePlantingZone, redLowerSidePlantingZone, 
+        blueUpperSidePlantingZone, blueLowerSidePlantingZone, 
+        redColouredPlantingZone, blueColouredPlantingZone, 
+        redCenterPlantingZone, blueCenterPlantingZone, 
+        redCenterGoldenPlantingZone, blueCenterGoldenPlantingZone,
+        redUpperSideGoldenPlantingZone, blueUpperSideGoldenPlantingZone,
+        redLowerSideGoldenPlantingZone, blueLowerSideGoldenPlantingZone,
+        redColouredGoldenPlantingZone, blueColouredGoldenPlantingZone,
+        redAutoRobotRecogn, blueAutoRobotRecogn,
+        redAutoRobotMove, blueAutoRobotMove,
+    ])
 
     return (
         <>
@@ -294,13 +468,17 @@ export default function Dashboard() {
             <Box style={{
                 fontSize: '1.3rem',
                 margin: '1rem',
+                zIndex: 10
             }}>
             GameID: {gameID}
+            <br />
+            <Button onClick={resetProps} colorScheme="red" size={"sm"}>Reset Props</Button>
             </Box>
             <Box style={{
                 height: '20%',
                 width: '100%',
                 position: 'absolute',
+                justifyContent: 'center',
             }}>
                 {/** Clock Box */}
                 <TimerBox 
@@ -330,104 +508,181 @@ export default function Dashboard() {
                     }}/>
                 </Box>
                 <Box style={{
-                    height: '10%',
-                    width: '10%',
-                    left: '39.2%',
+                    left: '42.3%',
                     top: '3%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <HoriztonalCounter counter={redAutoRobotTask} setCounter={setRedAutoRobotTask} />
+                    <Counter counter={redAutoRobotTask} setCounter={setRedAutoRobotTask} color={"red"} />
                 </Box>
                 <Box style={{
-                    height: '10%',
-                    width: '10%',
-                    left: '52.2%',
+                    left: '55%',
                     top: '3%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <HoriztonalCounter counter={blueAutoRobotTask} setCounter={setBlueAutoRobotTask} />
+                    <Counter counter={blueAutoRobotTask} setCounter={setBlueAutoRobotTask} color={"blue"} />
                 </Box>
                 <Box style={{
-                    height: '10%',
-                    width: '10%',
-                    left: '35.5%',
+                    left: '38.5%',
                     top: '85%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <HoriztonalCounter counter={redColouredPlantingZone} setCounter={setRedColouredPlantingZone} />
+                    <Counter counter={redColouredPlantingZone} setCounter={setRedColouredPlantingZone} color={"red"} />
                 </Box>
                 <Box style={{
-                    height: '10%',
-                    width: '10%',
-                    left: '55.5%',
+                    left: '58.5%',
                     top: '85%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <HoriztonalCounter counter={blueColouredPlantingZone} setCounter={setBlueColouredPlantingZone} />
+                    <Counter counter={blueColouredPlantingZone} setCounter={setBlueColouredPlantingZone} color={"blue"} />
                 </Box>
                 <Box style={{
-                    height: '10%',
-                    width: '10%',
                     left: '46%',
-                    top: '66%',
+                    top: '79.2%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <VerticalCounter counter={redLowerSidePlantingZone} setCounter={setRedLowerSidePlantingZone} />
+                    <Counter counter={redLowerSidePlantingZone} setCounter={setRedLowerSidePlantingZone} color={"red"} />
                 </Box>
                 <Box style={{
-                    height: '10%',
-                    width: '10%',
                     left: '51.5%',
-                    top: '66%',
+                    top: '79.2%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <VerticalCounter counter={blueLowerSidePlantingZone} setCounter={setBlueLowerSidePlantingZone} />
+                    <Counter counter={blueLowerSidePlantingZone} setCounter={setBlueLowerSidePlantingZone} color={"blue"} />
                 </Box>
                 <Box style={{
-                    height: '10%',
-                    width: '10%',
                     left: '46%',
-                    top: '14.5%',
+                    top: '28%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <VerticalCounter counter={redUpperSidePlantingZone} setCounter={setRedUpperSidePlantingZone} />
+                    <Counter counter={redUpperSidePlantingZone} setCounter={setRedUpperSidePlantingZone} color={"red"} />
                 </Box>
                 <Box style={{
-                    height: '10%',
-                    width: '10%',
                     left: '51.5%',
-                    top: '14.5%',
+                    top: '28%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <VerticalCounter counter={blueUpperSidePlantingZone} setCounter={setBlueUpperSidePlantingZone} />
+                    <Counter counter={blueUpperSidePlantingZone} setCounter={setBlueUpperSidePlantingZone} color={"blue"} />
                 </Box>
                 <Box style={{
-                    height: '10%',
-                    width: '10%',
                     left: '45%',
-                    top: '40%',
+                    top: '54.5%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <VerticalCounter counter={redCenterPlantingZone} setCounter={setRedCenterPlantingZone} />
+                    <Counter counter={redCenterPlantingZone} setCounter={setRedCenterPlantingZone} color={"red"} />
                 </Box>
                 <Box style={{
-                    height: '10%',
-                    width: '10%',
                     left: '52.2%',
-                    top: '40%',
+                    top: '54.5%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <VerticalCounter counter={blueCenterPlantingZone} setCounter={setBlueCenterPlantingZone} />
+                    <Counter counter={blueCenterPlantingZone} setCounter={setBlueCenterPlantingZone} color={"blue"} />
+                </Box>
+
+                <Box style={{
+                    left: '45%',
+                    top: '45%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Counter counter={redCenterGoldenPlantingZone} setCounter={setRedCenterGoldenPlantingZone} color={"gold"} />
+                </Box>
+                <Box style={{
+                    left: '52.2%',
+                    top: '45%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Counter counter={blueCenterGoldenPlantingZone} setCounter={setBlueCenterGoldenPlantingZone} color={"gold"} />
+                </Box>
+                <Box style={{
+                    left: '46%',
+                    top: '20%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Counter counter={redUpperSideGoldenPlantingZone} setCounter={setRedUpperSideGoldenPlantingZone} color={"gold"} />
+                </Box>
+                <Box style={{
+                    left: '51.5%',
+                    top: '20%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Counter counter={blueUpperSideGoldenPlantingZone} setCounter={setBlueUpperSideGoldenPlantingZone} color={"gold"} />
+                </Box>
+                <Box style={{
+                    left: '46%',
+                    top: '71.2%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Counter counter={redLowerSideGoldenPlantingZone} setCounter={setRedLowerSideGoldenPlantingZone} color={"gold"} />
+                </Box>
+                <Box style={{
+                    left: '51.5%',
+                    top: '71.2%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Counter counter={blueLowerSideGoldenPlantingZone} setCounter={setBlueLowerSideGoldenPlantingZone} color={"gold"} />
+                </Box>
+                <Box style={{
+                    left: '38.5%',
+                    top: '77%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Counter counter={redColouredGoldenPlantingZone} setCounter={setRedColouredGoldenPlantingZone} color={"gold"} />
+                </Box>
+                <Box style={{
+                    left: '58.5%',
+                    top: '77%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Counter counter={blueColouredGoldenPlantingZone} setCounter={setBlueColouredGoldenPlantingZone} color={"gold"} />
+                </Box>
+                <Box style={{
+                    left: '32.5%',
+                    top: '1.5%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Button onClick={()=>{setRedAutoRobotRecogn(redAutoRobotRecogn==1?0:1)}} colorScheme={redAutoRobotRecogn==1?"green":"red"}>Rc</Button>
+                </Box>
+                <Box style={{
+                    left: '36.5%',
+                    top: '1.5%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Button onClick={()=>{setRedAutoRobotMove(redAutoRobotMove==1?0:1)}} colorScheme={redAutoRobotMove==1?"green":"red"}>Mv</Button>
+                </Box>
+                <Box style={{
+                    left: '59.8%',
+                    top: '1.5%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Button onClick={()=>{setBlueAutoRobotRecogn(blueAutoRobotRecogn==1?0:1)}} colorScheme={blueAutoRobotRecogn==1?"green":"red"}>Rc</Button>
+                </Box>
+                <Box style={{
+                    left: '63.7%',
+                    top: '1.5%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <Button onClick={()=>{setBlueAutoRobotMove(blueAutoRobotMove==1?0:1)}} colorScheme={blueAutoRobotMove==1?"green":"red"}>Mv</Button>
                 </Box>
             </Box>
         </Box>

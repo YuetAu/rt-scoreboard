@@ -45,6 +45,21 @@ export default function Display() {
                             updateClockText();
                         }
                     })
+
+                    onValue(child(dbRef, `games/${gameID}/props/scores`), (snapshot) => {
+                        const newScores = snapshot.val();
+                        if (newScores) {
+                            setRedTeamPoints(newScores.red);
+                            setBlueTeamPoints(newScores.blue);
+                            if (newScores.redGreatVictory) {
+                                setGreatVictory("red");
+                            } else if (newScores.blueGreatVictory) {
+                                setGreatVictory("blue");
+                            } else {
+                                setGreatVictory("");
+                            }
+                        }
+                    });
                 } else {
                     console.log("Game does not exist");
                     //Notify user
@@ -110,75 +125,6 @@ export default function Display() {
         setGameIDModal(false);
     };
 
-    const startClock = () => {
-        console.log("Clock Started")
-        clockToggle.current = true;
-        clockData.current = { stage: gameStage.current, elapsed: clockElapse.current, paused: false, timestamp: Date.now() };
-        updateClockText();
-        set(child(dbRef, `games/${gameID}/clock`), {
-            stage: gameStage.current,
-            timestamp: Date.now(),
-            elapsed: clockElapse.current,
-            paused: false
-        })
-    }
-
-    const stopClock = () => {
-        console.log("Clock Stopped")
-        clockToggle.current = false;
-        clockElapse.current += Date.now()-clockData.current.timestamp;
-        clockData.current = { stage: gameStage.current, elapsed: clockElapse.current, paused: true, timestamp: Date.now() };
-        updateClockText();
-        set(child(dbRef, `games/${gameID}/clock`), {
-            stage: gameStage.current,
-            timestamp: Date.now(),
-            elapsed: clockElapse.current,
-            paused: true
-        })
-    }
-
-    const toggleClock = () => {
-        if (clockToggle.current) {
-            stopClock();
-        } else {
-            startClock();
-        }
-    }
-
-    const resetStage = () => {
-        stopClock();
-        console.log("Reset Stage Time")
-        clockToggle.current = false;
-        clockElapse.current = 0;
-        clockData.current = { stage: gameStage.current, paused: true, elapsed: 0, timestamp: Date.now() };
-        updateClockText();
-        set(child(dbRef, `games/${gameID}/clock`), {
-            stage: gameStage.current,
-            timestamp: Date.now(),
-            elapsed: 0,
-            paused: true
-        })
-    }
-
-    const changeStage = (skipStage:number) => {
-        if (GAME_STAGES.indexOf(gameStage.current)+skipStage < 0 ) return;
-        if (GAME_STAGES.indexOf(gameStage.current)+skipStage > GAME_STAGES.length-1 ) return;
-        const index = GAME_STAGES.indexOf(gameStage.current);
-        const nextStage = GAME_STAGES[index+skipStage];
-        const remainingTime = GAME_STAGES_TIME[index+skipStage]*1000;
-        gameStage.current = nextStage;
-        clockToggle.current = remainingTime > 0 ? true : false;
-        clockElapse.current = 0;
-        clockData.current = { stage: nextStage, timestamp: Date.now(), elapsed: 0, paused: remainingTime > 0 ? false : true };
-        updateClockText();
-        set(child(dbRef, `games/${gameID}/clock`), {
-            stage: nextStage,
-            timestamp: Date.now(),
-            elapsed: 0,
-            paused: remainingTime > 0 ? false : true
-        })
-    }
-
     const gameIDInput = useRef<HTMLInputElement>(null);
     const [gameIDModal, setGameIDModal] = useState(true);
 
@@ -192,31 +138,20 @@ export default function Display() {
         }
     }
 
-    /* const [containerHeight, setContainerHeight] = useState(0);
-
-    useEffect(() => {
-        const handleResize = () => {
-            setContainerHeight(window.innerHeight);
-        }
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []) */
+    // Game Scores
+    const [redTeamPoints, setRedTeamPoints] = useState(0);
+    const [blueTeamPoints, setBlueTeamPoints] = useState(0);
+    const [greatVictory, setGreatVictory] = useState("");
 
     return (
         <>
-        <Box style={{
-            //height: containerHeight,
-            //width: '20rem',
-            //overflow: 'hidden',
-        }}>
+        <Box>
                 <FloatBox 
                     timeText={clockText} 
-                    redTeamPoints={0} 
-                    blueTeamPoints={0} 
+                    redTeamPoints={redTeamPoints} 
+                    blueTeamPoints={blueTeamPoints} 
                     gameStage={GAME_STAGES_TEXT[GAME_STAGES.indexOf(gameStage.current)]}
+                    greatVictory={greatVictory}
                 />
         </Box>
         <Modal isOpen={gameIDModal} onClose={()=>{}} isCentered>

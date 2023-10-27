@@ -26,7 +26,7 @@ export default function FloatBox(props: any) {
         }}>
             {time.minutes}:{time.seconds}.{time.milliseconds}
         </Box>
-        <Box m={"4rem"} mt={"0.7rem"} style={{
+        <Box m={"4rem"} my={"0.7rem"} style={{
             fontFamily: "'Quicksand Variable', sans-serif",
             fontSize: "3rem",
             fontWeight: "700",
@@ -47,6 +47,15 @@ export default function FloatBox(props: any) {
             }}>
                 {props.blueTeamPoints}
             </Box>
+        </Box>
+        <Box boxShadow='lg' m={"4rem"} my={"0.7rem"} rounded='md' bg='white' hidden={props.greatVictory==""} p={"0.4rem"} style={{
+            fontSize: "1.5rem",
+            fontWeight: "700",
+            width: "12rem",
+            textAlign: "center",
+            backgroundColor: props.greatVictory=="red"?"#F56565":props.greatVictory=="blue"?"#11B5E4":"white",
+        }}>
+            Great Victory!
         </Box>
         </>
     )
