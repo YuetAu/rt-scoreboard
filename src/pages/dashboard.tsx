@@ -337,6 +337,13 @@ export default function Dashboard() {
             if (blueColouredGoldenPlantingZone > gameProps.current.blueColouredGoldenPlantingZone) {setBlueColouredGoldenPlantingZone(gameProps.current.blueColouredGoldenPlantingZone); return;}
         }
 
+        if (redCenterPlantingZone+redCenterGoldenPlantingZone+blueCenterPlantingZone+blueCenterGoldenPlantingZone > 8) {
+            if (redCenterPlantingZone > gameProps.current.redCenterPlantingZone) {setRedCenterPlantingZone(gameProps.current.redCenterPlantingZone); return;}
+            if (redCenterGoldenPlantingZone > gameProps.current.redCenterGoldenPlantingZone) {setRedCenterGoldenPlantingZone(gameProps.current.redCenterGoldenPlantingZone); return;}
+            if (blueCenterPlantingZone > gameProps.current.blueCenterPlantingZone) {setBlueCenterPlantingZone(gameProps.current.blueCenterPlantingZone); return;}
+            if (blueCenterGoldenPlantingZone > gameProps.current.blueCenterGoldenPlantingZone) {setBlueCenterGoldenPlantingZone(gameProps.current.blueCenterGoldenPlantingZone); return;}
+        }
+
         // Calculate the marks
         var redPoints = 0;
         if (redAutoRobotRecogn == 1) redPoints += 30; // 2.5.2.1
