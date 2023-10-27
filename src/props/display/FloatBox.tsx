@@ -28,7 +28,7 @@ export default function FloatBox(props: any) {
         </Box>
         <Box m={"4rem"} my={"0.7rem"} style={{
             fontFamily: "'Quicksand Variable', sans-serif",
-            fontSize: "3rem",
+            fontSize: "2.9rem",
             fontWeight: "700",
             width: "12rem",
             display: "flex",
