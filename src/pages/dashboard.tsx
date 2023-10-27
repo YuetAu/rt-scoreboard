@@ -47,6 +47,34 @@ export default function Dashboard() {
                             updateClockText();
                         }
                     })
+
+                    setRedAutoRobotTask(gameData.props.redAutoRobotTask);
+                    setBlueAutoRobotTask(gameData.props.blueAutoRobotTask);
+                    setRedUpperSidePlantingZone(gameData.props.redUpperSidePlantingZone);
+                    setRedLowerSidePlantingZone(gameData.props.redLowerSidePlantingZone);
+                    setBlueUpperSidePlantingZone(gameData.props.blueUpperSidePlantingZone);
+                    setBlueLowerSidePlantingZone(gameData.props.blueLowerSidePlantingZone);
+                    setRedColouredPlantingZone(gameData.props.redColouredPlantingZone);
+                    setBlueColouredPlantingZone(gameData.props.blueColouredPlantingZone);
+                    setRedCenterPlantingZone(gameData.props.redCenterPlantingZone);
+                    setBlueCenterPlantingZone(gameData.props.blueCenterPlantingZone);
+
+                    onValue(child(dbRef, `games/${gameID}/props`), (snapshot) => {
+                        const newPropsData = snapshot.val();
+                        if (newPropsData) {
+                            setRedAutoRobotTask(newPropsData.redAutoRobotTask);
+                            setBlueAutoRobotTask(newPropsData.blueAutoRobotTask);
+                            setRedUpperSidePlantingZone(newPropsData.redUpperSidePlantingZone);
+                            setRedLowerSidePlantingZone(newPropsData.redLowerSidePlantingZone);
+                            setBlueUpperSidePlantingZone(newPropsData.blueUpperSidePlantingZone);
+                            setBlueLowerSidePlantingZone(newPropsData.blueLowerSidePlantingZone);
+                            setRedColouredPlantingZone(newPropsData.redColouredPlantingZone);
+                            setBlueColouredPlantingZone(newPropsData.blueColouredPlantingZone);
+                            setRedCenterPlantingZone(newPropsData.redCenterPlantingZone);
+                            setBlueCenterPlantingZone(newPropsData.blueCenterPlantingZone);
+                        }
+                    });
+
                 } else {
                     console.log("Game does not exist");
                     //Notify user
@@ -106,7 +134,8 @@ export default function Dashboard() {
         set(child(dbRef, `games/${newGameID}`), {
             createdAt: Date.now(),
             device: {},
-            clock: { stage: "PREP", timestamp: 0, elapsed: 0, paused: true }
+            clock: { stage: "PREP", timestamp: 0, elapsed: 0, paused: true },
+            props: {},
         });
         setGameID(newGameID);
         setGameIDModal(false);
@@ -212,7 +241,7 @@ export default function Dashboard() {
     }, [])
 
     // Game Props
-    const [redAutoRobotTask, setRedAutoRobotTask] = useState("0");
+    const [redAutoRobotTask, setRedAutoRobotTask] = useState(0);
     const [blueAutoRobotTask, setBlueAutoRobotTask] = useState(0);
     const [redUpperSidePlantingZone, setRedUpperSidePlantingZone] = useState(0);
     const [redLowerSidePlantingZone, setRedLowerSidePlantingZone] = useState(0);
@@ -222,6 +251,30 @@ export default function Dashboard() {
     const [blueColouredPlantingZone, setBlueColouredPlantingZone] = useState(0);
     const [redCenterPlantingZone, setRedCenterPlantingZone] = useState(0);
     const [blueCenterPlantingZone, setBlueCenterPlantingZone] = useState(0);
+
+    useEffect(() => {
+        console.log("Updating Props")
+
+        // GameRules
+        if (redAutoRobotTask > 2) {setRedAutoRobotTask(2); return;}
+        if (blueAutoRobotTask > 2) {setBlueAutoRobotTask(2); return;}
+
+
+        if (gameID) {
+            set(child(dbRef, `games/${gameID}/props`), {
+                redAutoRobotTask: redAutoRobotTask,
+                blueAutoRobotTask: blueAutoRobotTask,
+                redUpperSidePlantingZone: redUpperSidePlantingZone,
+                redLowerSidePlantingZone: redLowerSidePlantingZone,
+                blueUpperSidePlantingZone: blueUpperSidePlantingZone,
+                blueLowerSidePlantingZone: blueLowerSidePlantingZone,
+                redColouredPlantingZone: redColouredPlantingZone,
+                blueColouredPlantingZone: blueColouredPlantingZone,
+                redCenterPlantingZone: redCenterPlantingZone,
+                blueCenterPlantingZone: blueCenterPlantingZone,
+            });
+        }
+    }, [redAutoRobotTask, blueAutoRobotTask, redUpperSidePlantingZone, redLowerSidePlantingZone, blueUpperSidePlantingZone, blueLowerSidePlantingZone, redColouredPlantingZone, blueColouredPlantingZone, redCenterPlantingZone, blueCenterPlantingZone])
 
     return (
         <>

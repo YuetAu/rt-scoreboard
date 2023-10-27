@@ -17,7 +17,7 @@ export function HoriztonalCounter(props: any) {
             }}>
                 {props.counter}
             </Box>
-            <Button mx={"0.2rem"} style={{fontSize: "2rem", lineHeight: "2.5rem"}} width={"2.5rem"} onClick={()=>props.setCounter(props.counter-1)}><FontAwesomeIcon icon={faArrowDown}/></Button>
+            <Button mx={"0.2rem"} style={{fontSize: "2rem", lineHeight: "2.5rem"}} width={"2.5rem"} onClick={()=>props.setCounter(props.counter-1>0?props.counter-1:0)}><FontAwesomeIcon icon={faArrowDown}/></Button>
         </Flex>
     )
 }
@@ -36,7 +36,7 @@ export function VerticalCounter(props: any) {
             }}>
                 {props.counter}
             </Box>
-            <Button mt={"-0.5rem"} style={{fontSize: "2rem", lineHeight: "2.5rem"}} width={"2.5rem"} onClick={()=>props.setCounter(props.counter-1)}><FontAwesomeIcon icon={faArrowDown}/></Button>
+            <Button mt={"-0.5rem"} style={{fontSize: "2rem", lineHeight: "2.5rem"}} width={"2.5rem"} onClick={()=>props.setCounter(props.counter-1>0?props.counter-1:0)}><FontAwesomeIcon icon={faArrowDown}/></Button>
         </>
     )
 }
