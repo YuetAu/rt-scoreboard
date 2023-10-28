@@ -7,10 +7,13 @@ import { useEffect, useRef, useState } from "react";
 import "@fontsource-variable/quicksand";
 import TimerBox from "@/props/dashboard/TimerBox";
 import { Counter } from "@/props/dashboard/Counter";
+import { useSnackbar } from "notistack";
 
 export default function Dashboard() {
 
     const dbRef = ref(FirebaseDatabase);
+
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     const [gameID, setGameID] = useState("");
     const [deviceID, setDeviceID] = useState("");
@@ -32,6 +35,7 @@ export default function Dashboard() {
                         device: { ...gameData.device, [deviceID]: "CONTROLLER" },
                     });
                     console.log("Game Fetched");
+                    enqueueSnackbar(`Game Loaded`, {variant: "success"})
                     gameStage.current = gameData.clock.stage;
                     clockElapse.current = gameData.clock.elapsed;
                     clockToggle.current = !gameData.clock.paused;
@@ -58,7 +62,7 @@ export default function Dashboard() {
 
                 } else {
                     console.log("Game does not exist");
-                    //Notify user
+                    enqueueSnackbar(`Game Not Exist`, {variant: "error"})
                 }
             }).catch((error) => {
                 console.error(error);
@@ -127,6 +131,10 @@ export default function Dashboard() {
                         elapsed: 0,
                         paused: remainingTime > 0 ? false : true
                     })
+                    if (newGameStage == "END") {
+                        enqueueSnackbar(`Game END`, {variant: "success"})
+                        gameEndVictoryCalc();
+                    }
                 }
             }
         }
@@ -153,6 +161,7 @@ export default function Dashboard() {
         clockToggle.current = true;
         clockData.current = { stage: gameStage.current, elapsed: clockElapse.current, paused: false, timestamp: Date.now() };
         updateClockText();
+        enqueueSnackbar("Clock Started", {variant: "success"})
         set(child(dbRef, `games/${gameID}/clock`), {
             stage: gameStage.current,
             timestamp: Date.now(),
@@ -167,6 +176,7 @@ export default function Dashboard() {
         clockElapse.current += Date.now()-clockData.current.timestamp;
         clockData.current = { stage: gameStage.current, elapsed: clockElapse.current, paused: true, timestamp: Date.now() };
         updateClockText();
+        enqueueSnackbar("Clock Stopped", {variant: "success"})
         set(child(dbRef, `games/${gameID}/clock`), {
             stage: gameStage.current,
             timestamp: Date.now(),
@@ -185,11 +195,13 @@ export default function Dashboard() {
 
     const resetStage = () => {
         stopClock();
+        closeSnackbar();
         console.log("Reset Stage Time")
         clockToggle.current = false;
         clockElapse.current = 0;
         clockData.current = { stage: gameStage.current, paused: true, elapsed: 0, timestamp: Date.now() };
         updateClockText();
+        enqueueSnackbar(`Reset stage ${gameStage.current}`, {variant: "success"});
         set(child(dbRef, `games/${gameID}/clock`), {
             stage: gameStage.current,
             timestamp: Date.now(),
@@ -209,6 +221,7 @@ export default function Dashboard() {
         clockElapse.current = 0;
         clockData.current = { stage: nextStage, timestamp: Date.now(), elapsed: 0, paused: remainingTime > 0 ? false : true };
         updateClockText();
+        enqueueSnackbar(`Skip stage to ${gameStage.current}`, {variant: "success"})
         set(child(dbRef, `games/${gameID}/clock`), {
             stage: nextStage,
             timestamp: Date.now(),
@@ -247,6 +260,22 @@ export default function Dashboard() {
         }
     }, [])
 
+    const resetClock = () => {
+        stopClock();
+        console.log("Reset Clock")
+        clockToggle.current = false;
+        clockElapse.current = 0;
+        gameStage.current = GAME_STAGES[0]
+        clockData.current = { stage: gameStage.current, paused: true, elapsed: 0, timestamp: Date.now() };
+        updateClockText();
+        set(child(dbRef, `games/${gameID}/clock`), {
+            stage: gameStage.current,
+            timestamp: Date.now(),
+            elapsed: 0,
+            paused: true
+        })
+    }
+
     // Game Props
     const [redAutoRobotTask, setRedAutoRobotTask] = useState(0);
     const [blueAutoRobotTask, setBlueAutoRobotTask] = useState(0);
@@ -274,7 +303,10 @@ export default function Dashboard() {
     const [gameScore, setGameScore] = useState({ red: 0, blue: 0, redOccoupyingZone: 0, blueOccoupyingZone: 0, redPlacedSeedlings: 0, bluePlacedSeedlings: 0, redGreatVictory: false, blueGreatVictory: false });
     const gameProps = useRef<any>({});
 
+    const forceResetProps = useRef(false);
+
     const resetProps = () => {
+        forceResetProps.current = true;
         setRedAutoRobotTask(0);
         setBlueAutoRobotTask(0);
         setRedUpperSidePlantingZone(0);
@@ -297,16 +329,32 @@ export default function Dashboard() {
         setBlueAutoRobotRecogn(0);
         setRedAutoRobotMove(0);
         setBlueAutoRobotMove(0);
+        gameProps.current = {};
+        forceResetProps.current = false;
     }
 
     useEffect(() => {
         console.log("Updating Props")
 
+        if (gameID == "") return;
+        
+        if (!forceResetProps.current && gameStage.current == "PREP") {resetProps(); enqueueSnackbar("Changes not allowed at PREP", {variant: "error", preventDuplicate: true}); return;}
+        if (gameStage.current == "END") { enqueueSnackbar("Editing after game", {variant: "info"}); }
+
         // GameRules
         if (redAutoRobotTask > 2) {setRedAutoRobotTask(2); return;}
         if (blueAutoRobotTask > 2) {setBlueAutoRobotTask(2); return;}
 
+        // For Future Victory Check
+        if (gameProps.current.scores) {
+            if (!gameProps.current.scores.redAutoRobotTaskElapsed && redAutoRobotTask == 2) {gameProps.current.scores.redAutoRobotTaskElapsed = Date.now()-clockData.current.timestamp+clockData.current.elapsed;}
+            if (!gameProps.current.scores.blueAutoRobotTaskElapsed && blueAutoRobotTask == 2) {gameProps.current.scores.blueAutoRobotTaskElapsed = Date.now()-clockData.current.timestamp+clockData.current.elapsed;}
+            if (redAutoRobotTask < 2) {gameProps.current.scores.redAutoRobotTaskElapsed = null}
+            if (blueAutoRobotTask < 2) {gameProps.current.scores.blueAutoRobotTaskElapsed = null}
+        }
+
         if (redUpperSidePlantingZone+redCenterPlantingZone+redLowerSidePlantingZone+redColouredPlantingZone > 9) {
+            enqueueSnackbar("Red Team Too Many Seedlings", {variant: "error", preventDuplicate: true})
             if (redUpperSidePlantingZone > gameProps.current.redUpperSidePlantingZone) {setRedUpperSidePlantingZone(gameProps.current.redUpperSidePlantingZone); return;}
             if (redCenterPlantingZone > gameProps.current.redCenterPlantingZone) {setRedCenterPlantingZone(gameProps.current.redCenterPlantingZone); return;}
             if (redLowerSidePlantingZone > gameProps.current.redLowerSidePlantingZone) {setRedLowerSidePlantingZone(gameProps.current.redLowerSidePlantingZone); return;}
@@ -315,6 +363,7 @@ export default function Dashboard() {
 
 
         if (blueUpperSidePlantingZone+blueCenterPlantingZone+blueLowerSidePlantingZone+blueColouredPlantingZone > 9) {
+            enqueueSnackbar("Blue Team Too Many Seedlings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
             if (blueUpperSidePlantingZone > gameProps.current.blueUpperSidePlantingZone) {setBlueUpperSidePlantingZone(gameProps.current.blueUpperSidePlantingZone); return;}
             if (blueCenterPlantingZone > gameProps.current.blueCenterPlantingZone) {setBlueCenterPlantingZone(gameProps.current.blueCenterPlantingZone); return;}
             if (blueLowerSidePlantingZone > gameProps.current.blueLowerSidePlantingZone) {setBlueLowerSidePlantingZone(gameProps.current.blueLowerSidePlantingZone); return;}
@@ -323,6 +372,7 @@ export default function Dashboard() {
 
 
         if (redUpperSideGoldenPlantingZone+redCenterGoldenPlantingZone+redLowerSideGoldenPlantingZone+redColouredGoldenPlantingZone > 3) {
+            enqueueSnackbar("Red Team Too Many Golden Seedlings", {variant: "error", preventDuplicate: true})
             if (redUpperSideGoldenPlantingZone > gameProps.current.redUpperSideGoldenPlantingZone) {setRedUpperSideGoldenPlantingZone(gameProps.current.redUpperSideGoldenPlantingZone); return;}
             if (redCenterGoldenPlantingZone > gameProps.current.redCenterGoldenPlantingZone) {setRedCenterGoldenPlantingZone(gameProps.current.redCenterGoldenPlantingZone); return;}
             if (redLowerSideGoldenPlantingZone > gameProps.current.redLowerSideGoldenPlantingZone) {setRedLowerSideGoldenPlantingZone(gameProps.current.redLowerSideGoldenPlantingZone); return;}
@@ -331,6 +381,7 @@ export default function Dashboard() {
 
 
         if (blueUpperSideGoldenPlantingZone+blueCenterGoldenPlantingZone+blueLowerSideGoldenPlantingZone+blueColouredGoldenPlantingZone > 3) {
+            enqueueSnackbar("Blue Team Too Many Golden Seedlings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
             if (blueUpperSideGoldenPlantingZone > gameProps.current.blueUpperSideGoldenPlantingZone) {setBlueUpperSideGoldenPlantingZone(gameProps.current.blueUpperSideGoldenPlantingZone); return;}
             if (blueCenterGoldenPlantingZone > gameProps.current.blueCenterGoldenPlantingZone) {setBlueCenterGoldenPlantingZone(gameProps.current.blueCenterGoldenPlantingZone); return;}
             if (blueLowerSideGoldenPlantingZone > gameProps.current.blueLowerSideGoldenPlantingZone) {setBlueLowerSideGoldenPlantingZone(gameProps.current.blueLowerSideGoldenPlantingZone); return;}
@@ -338,6 +389,7 @@ export default function Dashboard() {
         }
 
         if (redCenterPlantingZone+redCenterGoldenPlantingZone+blueCenterPlantingZone+blueCenterGoldenPlantingZone > 8) {
+            enqueueSnackbar("Center Planting Zone Too Many Seelings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "center", vertical: "bottom" }})
             if (redCenterPlantingZone > gameProps.current.redCenterPlantingZone) {setRedCenterPlantingZone(gameProps.current.redCenterPlantingZone); return;}
             if (redCenterGoldenPlantingZone > gameProps.current.redCenterGoldenPlantingZone) {setRedCenterGoldenPlantingZone(gameProps.current.redCenterGoldenPlantingZone); return;}
             if (blueCenterPlantingZone > gameProps.current.blueCenterPlantingZone) {setBlueCenterPlantingZone(gameProps.current.blueCenterPlantingZone); return;}
@@ -367,12 +419,20 @@ export default function Dashboard() {
         bluePoints += (blueUpperSideGoldenPlantingZone+blueLowerSideGoldenPlantingZone) * 30; // 2.5.1.5
         bluePoints += blueCenterGoldenPlantingZone * 40; // 2.5.1.6
 
+        // Perform Great Victory Check
+        // Per Interpretation on 2.7.1 and Game Process Realated Great Victory
+        // The team occupying 4 Planting Zones with more than 5 seedlings in total will achieve Great Victory, the team wins and the game ends immediately.
         var redGreatVictory = false;
         var blueGreatVictory = false;
         var redOccoupyingZone = 0;
         var blueOccoupyingZone = 0;
-        const redPlacedSeedlings = redUpperSidePlantingZone+redCenterPlantingZone+redLowerSidePlantingZone+redColouredPlantingZone+redUpperSideGoldenPlantingZone+redCenterGoldenPlantingZone+redLowerSideGoldenPlantingZone+redColouredGoldenPlantingZone;
-        const bluePlacedSeedlings = blueUpperSidePlantingZone+blueCenterPlantingZone+blueLowerSidePlantingZone+blueColouredPlantingZone+blueUpperSideGoldenPlantingZone+blueCenterGoldenPlantingZone+blueLowerSideGoldenPlantingZone+blueColouredGoldenPlantingZone;
+        const redPlacedNormalSeedlings = redUpperSidePlantingZone+redCenterPlantingZone+redLowerSidePlantingZone+redColouredPlantingZone;
+        const redPlacedGoldenSeedlings = redUpperSideGoldenPlantingZone+redCenterGoldenPlantingZone+redLowerSideGoldenPlantingZone+redColouredGoldenPlantingZone;
+        const redPlacedSeedlings = redPlacedNormalSeedlings+redPlacedGoldenSeedlings;
+        const bluePlacedNormalSeedlings = blueUpperSidePlantingZone+blueCenterPlantingZone+blueLowerSidePlantingZone+blueColouredPlantingZone;
+        const bluePlacedGoldenSeedlings = blueUpperSideGoldenPlantingZone+blueCenterGoldenPlantingZone+blueLowerSideGoldenPlantingZone+blueColouredGoldenPlantingZone;
+        const bluePlacedSeedlings = bluePlacedNormalSeedlings+bluePlacedGoldenSeedlings;
+
         if ((redUpperSidePlantingZone+redUpperSideGoldenPlantingZone) > (blueUpperSidePlantingZone+blueUpperSideGoldenPlantingZone)) {
             redOccoupyingZone += 1;
         } else if ((redUpperSidePlantingZone+redUpperSideGoldenPlantingZone) < (blueUpperSidePlantingZone+blueUpperSideGoldenPlantingZone)) {
@@ -399,14 +459,17 @@ export default function Dashboard() {
 
         if (redOccoupyingZone == 4 && redPlacedSeedlings > 5) {
             redGreatVictory = true;
+            enqueueSnackbar(`RED GREAT VICTORY`, {variant: "success", autoHideDuration: 10000})
             stopClock();
         }
 
         if (blueOccoupyingZone == 4 && bluePlacedSeedlings > 5) {
             blueGreatVictory = true;
+            enqueueSnackbar(`BLUE GREAT VICTORY`, {variant: "success", anchorOrigin: { horizontal: "right", vertical: "bottom" }, autoHideDuration: 10000})
             stopClock();
         }
 
+        console.log(redPoints, bluePoints)
 
         gameProps.current = {
             redAutoRobotTask: redAutoRobotTask,
@@ -432,12 +495,15 @@ export default function Dashboard() {
             redAutoRobotMove: redAutoRobotMove,
             blueAutoRobotMove: blueAutoRobotMove,
             scores: {
+                ...gameProps.current.scores,
                 red: redPoints,
                 blue: bluePoints,
                 redOccoupyingZone: redOccoupyingZone,
                 blueOccoupyingZone: blueOccoupyingZone,
                 redPlacedSeedlings: redPlacedSeedlings,
                 bluePlacedSeedlings: bluePlacedSeedlings,
+                redPlacedGoldenSeedlings: redPlacedGoldenSeedlings,
+                bluePlacedGoldenSeedlings: bluePlacedGoldenSeedlings,
                 redGreatVictory: redGreatVictory,
                 blueGreatVictory: blueGreatVictory,
             }
@@ -456,6 +522,62 @@ export default function Dashboard() {
         redAutoRobotRecogn, blueAutoRobotRecogn,
         redAutoRobotMove, blueAutoRobotMove,
     ])
+
+    const gameEndVictoryCalc = () => {
+        // Preform Victory Check after 3 minutes Game Time
+        // Per Interpretation on 2.7.1
+        // The team with a higher total score
+        /*
+        In case two teams have the same score, the winner will be decided according to the following order:
+            i.  The team that occupies more Planting Zone;
+            ii. The team whose AR finished all the AR tasks first;
+            iii. The team with more golden seedlings in the Planting Zones;
+            iv. The team that has committed fewer violations;
+            v. The team with a less total weight of robots;
+            vi. Decisions made by referees.
+        */
+
+        const updateVictory = (redVictory: boolean, blueVictory: boolean) => {
+            set(child(dbRef, `games/${gameID}/props/scores`), {
+                redVictory: redVictory,
+                blueVictory: blueVictory,
+            });
+        }
+
+        var redVictory = false;
+        var blueVictory = false;
+        
+        if (gameProps.current.scores.red > gameProps.current.scores.blue) {
+            redVictory = true;
+        } else if (gameProps.current.scores.red < gameProps.current.scores.blue) {
+            blueVictory = true;
+        } else {
+            if (gameProps.current.scores.redOccoupyingZone > gameProps.current.scores.blueOccoupyingZone) {
+                redVictory = true;
+            } else if (gameProps.current.scores.redOccoupyingZone < gameProps.current.scores.blueOccoupyingZone) {
+                blueVictory = true;
+            } else {
+                if (gameProps.current.scores.redAutoRobotTaskElapsed < gameProps.current.scores.blueAutoRobotTaskElapsed) {
+                    redVictory = true;
+                } else if (gameProps.current.scores.redAutoRobotTaskElapsed > gameProps.current.scores.blueAutoRobotTaskElapsed) {
+                    blueVictory = true;
+                } else {
+                    if (gameProps.current.scores.redPlacedGoldenSeedlings > gameProps.current.scores.bluePlacedGoldenSeedlings) {
+                        redVictory = true;
+                    } else if (gameProps.current.scores.redPlacedGoldenSeedlings < gameProps.current.scores.bluePlacedGoldenSeedlings) {
+                        blueVictory = true;
+                    } else {
+                        // Unable to determine winner
+                        redVictory = false;
+                        blueVictory = false;
+                    }
+                }
+            }
+        }
+        if (redVictory) enqueueSnackbar(`RED VICTORY`, {variant: "success", autoHideDuration: 10000})
+        if (blueVictory) enqueueSnackbar(`BLUE VICTORY`, {variant: "success", anchorOrigin: { horizontal: "right", vertical: "bottom" }, autoHideDuration: 10000})
+        updateVictory(redVictory, blueVictory);
+    }
 
     return (
         <>
@@ -479,7 +601,11 @@ export default function Dashboard() {
             }}>
             GameID: {gameID}
             <br />
-            <Button onClick={resetProps} colorScheme="red" size={"sm"}>Reset Props</Button>
+            <Button onClick={()=>{navigator.clipboard.writeText(gameID).then(()=>enqueueSnackbar("GameID Copied!", {variant: "success"}))}} colorScheme="blue" size={"sm"}>Copy GameID</Button>
+            <br />
+            <Button onClick={()=>{resetProps();closeSnackbar();enqueueSnackbar("Props Reset!", {variant: "success"})}} colorScheme="red" size={"sm"}>Reset Props</Button>
+            <br />
+            <Button onClick={()=>{resetClock();closeSnackbar();enqueueSnackbar("Clock Reset!", {variant: "success"})}} colorScheme="red" size={"sm"}>Reset Clock</Button>
             </Box>
             <Box style={{
                 height: '20%',
