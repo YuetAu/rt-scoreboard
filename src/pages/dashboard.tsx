@@ -345,6 +345,13 @@ export default function Dashboard() {
         if (redAutoRobotTask > 2) {setRedAutoRobotTask(2); return;}
         if (blueAutoRobotTask > 2) {setBlueAutoRobotTask(2); return;}
 
+        const redPlacedNormalSeedlings = redUpperSidePlantingZone+redCenterPlantingZone+redLowerSidePlantingZone+redColouredPlantingZone;
+        const redPlacedGoldenSeedlings = redUpperSideGoldenPlantingZone+redCenterGoldenPlantingZone+redLowerSideGoldenPlantingZone+redColouredGoldenPlantingZone;
+        const redPlacedSeedlings = redPlacedNormalSeedlings+redPlacedGoldenSeedlings;
+        const bluePlacedNormalSeedlings = blueUpperSidePlantingZone+blueCenterPlantingZone+blueLowerSidePlantingZone+blueColouredPlantingZone;
+        const bluePlacedGoldenSeedlings = blueUpperSideGoldenPlantingZone+blueCenterGoldenPlantingZone+blueLowerSideGoldenPlantingZone+blueColouredGoldenPlantingZone;
+        const bluePlacedSeedlings = bluePlacedNormalSeedlings+bluePlacedGoldenSeedlings;
+
         // For Future Victory Check
         if (gameProps.current.scores) {
             if (!gameProps.current.scores.redAutoRobotTaskElapsed && redAutoRobotTask == 2) {gameProps.current.scores.redAutoRobotTaskElapsed = Date.now()-clockData.current.timestamp+clockData.current.elapsed;}
@@ -353,7 +360,7 @@ export default function Dashboard() {
             if (blueAutoRobotTask < 2) {gameProps.current.scores.blueAutoRobotTaskElapsed = null}
         }
 
-        if (redUpperSidePlantingZone+redCenterPlantingZone+redLowerSidePlantingZone+redColouredPlantingZone > 9) {
+        if (redPlacedNormalSeedlings > 9) {
             enqueueSnackbar("Red Team Too Many Seedlings", {variant: "error", preventDuplicate: true})
             if (redUpperSidePlantingZone > gameProps.current.redUpperSidePlantingZone) {setRedUpperSidePlantingZone(gameProps.current.redUpperSidePlantingZone); return;}
             if (redCenterPlantingZone > gameProps.current.redCenterPlantingZone) {setRedCenterPlantingZone(gameProps.current.redCenterPlantingZone); return;}
@@ -362,7 +369,7 @@ export default function Dashboard() {
         }
 
 
-        if (blueUpperSidePlantingZone+blueCenterPlantingZone+blueLowerSidePlantingZone+blueColouredPlantingZone > 9) {
+        if (bluePlacedNormalSeedlings > 9) {
             enqueueSnackbar("Blue Team Too Many Seedlings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
             if (blueUpperSidePlantingZone > gameProps.current.blueUpperSidePlantingZone) {setBlueUpperSidePlantingZone(gameProps.current.blueUpperSidePlantingZone); return;}
             if (blueCenterPlantingZone > gameProps.current.blueCenterPlantingZone) {setBlueCenterPlantingZone(gameProps.current.blueCenterPlantingZone); return;}
@@ -370,8 +377,15 @@ export default function Dashboard() {
             if (blueColouredPlantingZone > gameProps.current.blueColouredPlantingZone) {setBlueColouredPlantingZone(gameProps.current.blueColouredPlantingZone); return;}
         }
 
+        if (redAutoRobotTask != 2 && redPlacedGoldenSeedlings > 0) {
+            enqueueSnackbar("Red Team Golden Seedlings Not Unlocked", {variant: "error", preventDuplicate: true})
+            if (redUpperSideGoldenPlantingZone > gameProps.current.redUpperSideGoldenPlantingZone) {setRedUpperSideGoldenPlantingZone(gameProps.current.redUpperSideGoldenPlantingZone); return;}
+            if (redCenterGoldenPlantingZone > gameProps.current.redCenterGoldenPlantingZone) {setRedCenterGoldenPlantingZone(gameProps.current.redCenterGoldenPlantingZone); return;}
+            if (redLowerSideGoldenPlantingZone > gameProps.current.redLowerSideGoldenPlantingZone) {setRedLowerSideGoldenPlantingZone(gameProps.current.redLowerSideGoldenPlantingZone); return;}
+            if (redColouredGoldenPlantingZone > gameProps.current.redColouredGoldenPlantingZone) {setRedColouredGoldenPlantingZone(gameProps.current.redColouredGoldenPlantingZone); return;}
+        }
 
-        if (redUpperSideGoldenPlantingZone+redCenterGoldenPlantingZone+redLowerSideGoldenPlantingZone+redColouredGoldenPlantingZone > 3) {
+        if (redPlacedGoldenSeedlings > 3) {
             enqueueSnackbar("Red Team Too Many Golden Seedlings", {variant: "error", preventDuplicate: true})
             if (redUpperSideGoldenPlantingZone > gameProps.current.redUpperSideGoldenPlantingZone) {setRedUpperSideGoldenPlantingZone(gameProps.current.redUpperSideGoldenPlantingZone); return;}
             if (redCenterGoldenPlantingZone > gameProps.current.redCenterGoldenPlantingZone) {setRedCenterGoldenPlantingZone(gameProps.current.redCenterGoldenPlantingZone); return;}
@@ -379,8 +393,15 @@ export default function Dashboard() {
             if (redColouredGoldenPlantingZone > gameProps.current.redColouredGoldenPlantingZone) {setRedColouredGoldenPlantingZone(gameProps.current.redColouredGoldenPlantingZone); return;}
         }
 
+        if (blueAutoRobotTask != 2 && bluePlacedGoldenSeedlings > 0) {
+            enqueueSnackbar("Blue Team Golden Seedlings Not Unlocked", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
+            if (blueUpperSideGoldenPlantingZone > gameProps.current.blueUpperSideGoldenPlantingZone) {setBlueUpperSideGoldenPlantingZone(gameProps.current.blueUpperSideGoldenPlantingZone); return;}
+            if (blueCenterGoldenPlantingZone > gameProps.current.blueCenterGoldenPlantingZone) {setBlueCenterGoldenPlantingZone(gameProps.current.blueCenterGoldenPlantingZone); return;}
+            if (blueLowerSideGoldenPlantingZone > gameProps.current.blueLowerSideGoldenPlantingZone) {setBlueLowerSideGoldenPlantingZone(gameProps.current.blueLowerSideGoldenPlantingZone); return;}
+            if (blueColouredGoldenPlantingZone > gameProps.current.blueColouredGoldenPlantingZone) {setBlueColouredGoldenPlantingZone(gameProps.current.blueColouredGoldenPlantingZone); return;}
+        }
 
-        if (blueUpperSideGoldenPlantingZone+blueCenterGoldenPlantingZone+blueLowerSideGoldenPlantingZone+blueColouredGoldenPlantingZone > 3) {
+        if (bluePlacedGoldenSeedlings > 3) {
             enqueueSnackbar("Blue Team Too Many Golden Seedlings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
             if (blueUpperSideGoldenPlantingZone > gameProps.current.blueUpperSideGoldenPlantingZone) {setBlueUpperSideGoldenPlantingZone(gameProps.current.blueUpperSideGoldenPlantingZone); return;}
             if (blueCenterGoldenPlantingZone > gameProps.current.blueCenterGoldenPlantingZone) {setBlueCenterGoldenPlantingZone(gameProps.current.blueCenterGoldenPlantingZone); return;}
@@ -426,12 +447,6 @@ export default function Dashboard() {
         var blueGreatVictory = false;
         var redOccoupyingZone = 0;
         var blueOccoupyingZone = 0;
-        const redPlacedNormalSeedlings = redUpperSidePlantingZone+redCenterPlantingZone+redLowerSidePlantingZone+redColouredPlantingZone;
-        const redPlacedGoldenSeedlings = redUpperSideGoldenPlantingZone+redCenterGoldenPlantingZone+redLowerSideGoldenPlantingZone+redColouredGoldenPlantingZone;
-        const redPlacedSeedlings = redPlacedNormalSeedlings+redPlacedGoldenSeedlings;
-        const bluePlacedNormalSeedlings = blueUpperSidePlantingZone+blueCenterPlantingZone+blueLowerSidePlantingZone+blueColouredPlantingZone;
-        const bluePlacedGoldenSeedlings = blueUpperSideGoldenPlantingZone+blueCenterGoldenPlantingZone+blueLowerSideGoldenPlantingZone+blueColouredGoldenPlantingZone;
-        const bluePlacedSeedlings = bluePlacedNormalSeedlings+bluePlacedGoldenSeedlings;
 
         if ((redUpperSidePlantingZone+redUpperSideGoldenPlantingZone) > (blueUpperSidePlantingZone+blueUpperSideGoldenPlantingZone)) {
             redOccoupyingZone += 1;
