@@ -27,11 +27,12 @@ export default function TimerBox(props: any) {
         }}>
             {time.minutes}:{time.seconds}.{time.milliseconds}
         </Box>
-        <Box style={{
+        <Box hidden={props.hidden} style={{
             position: "relative",
             top: "-0.6rem",
             textAlign: "center",
             margin: "0"
+            
         }}>
             <ButtonGroup spacing='2'>
                 <Button onClick={()=>props.changeStage(-1)}>{"<<"}Prev</Button>

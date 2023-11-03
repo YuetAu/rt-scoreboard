@@ -613,20 +613,8 @@ export default function Dashboard() {
             color: 'white',
         }}>
             <Box style={{
-                fontSize: '1.3rem',
-                margin: '1rem',
-                zIndex: 10
-            }}>
-            GameID: {gameID}
-            <br />
-            <Button onClick={()=>{navigator.clipboard.writeText(gameID).then(()=>enqueueSnackbar("GameID Copied!", {variant: "success"}))}} colorScheme="blue" size={"sm"}>Copy GameID</Button>
-            <br />
-            <Button onClick={()=>{resetProps();closeSnackbar();enqueueSnackbar("Props Reset!", {variant: "success"})}} colorScheme="red" size={"sm"}>Reset Props</Button>
-            <br />
-            <Button onClick={()=>{resetClock();closeSnackbar();enqueueSnackbar("Clock Reset!", {variant: "success"})}} colorScheme="red" size={"sm"}>Reset Clock</Button>
-            </Box>
-            <Box style={{
-                height: '0%',
+                top: '5%',
+                height: '20%',
                 width: '100%',
                 position: 'absolute',
                 justifyContent: 'center',
@@ -635,8 +623,8 @@ export default function Dashboard() {
                 <TimerBox 
                     timeText={clockText} 
                     gameStage={gameStage.current} 
-                    clockToggle={clockToggle.current}
-                    hidden={false} 
+                    clockToggle={clockToggle.current} 
+                    hidden={true}
                     toggleClock={toggleClock} 
                     resetStage={resetStage} 
                     changeStage={changeStage}
@@ -813,28 +801,12 @@ export default function Dashboard() {
                     <Button onClick={()=>{setRedAutoRobotRecogn(redAutoRobotRecogn==1?0:1)}} colorScheme={redAutoRobotRecogn==1?"green":"red"}>Rc</Button>
                 </Box>
                 <Box style={{
-                    left: '36.5%',
-                    top: '1.5%',
-                    position: 'absolute',
-                    zIndex: 10,
-                }}>
-                    <Button onClick={()=>{setRedAutoRobotMove(redAutoRobotMove==1?0:1)}} colorScheme={redAutoRobotMove==1?"green":"red"}>Mv</Button>
-                </Box>
-                <Box style={{
-                    left: '59.8%',
+                    left: '64%',
                     top: '1.5%',
                     position: 'absolute',
                     zIndex: 10,
                 }}>
                     <Button onClick={()=>{setBlueAutoRobotRecogn(blueAutoRobotRecogn==1?0:1)}} colorScheme={blueAutoRobotRecogn==1?"green":"red"}>Rc</Button>
-                </Box>
-                <Box style={{
-                    left: '63.7%',
-                    top: '1.5%',
-                    position: 'absolute',
-                    zIndex: 10,
-                }}>
-                    <Button onClick={()=>{setBlueAutoRobotMove(blueAutoRobotMove==1?0:1)}} colorScheme={blueAutoRobotMove==1?"green":"red"}>Mv</Button>
                 </Box>
             </Box>
         </Box>
