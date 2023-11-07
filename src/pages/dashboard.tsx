@@ -8,6 +8,8 @@ import "@fontsource-variable/quicksand";
 import TimerBox from "@/props/dashboard/TimerBox";
 import { Counter } from "@/props/dashboard/Counter";
 import { useSnackbar } from "notistack";
+import { ScoreDisplay } from "@/props/dashboard/ScoreDisplay";
+import Teams from "../props/dashboard/teams.json";
 
 export default function Dashboard() {
 
@@ -50,8 +52,7 @@ export default function Dashboard() {
                             clockData.current = newClockData;
                             updateClockText();
                         }
-                    })
-
+                    });
                     if (gameData.props) updateGameProps(gameData.props);
                     onValue(child(dbRef, `games/${gameID}/props`), (snapshot) => {
                         const newPropsData = snapshot.val();
@@ -60,6 +61,17 @@ export default function Dashboard() {
                         }
                     });
 
+                    if (gameData.teams) {
+                        setRedTeam(gameData.teams.redTeam);
+                        setBlueTeam(gameData.teams.blueTeam);
+                    };
+                    onValue(child(dbRef, `games/${gameID}/team`), (snapshot) => {
+                        const newTeamData = snapshot.val();
+                        if (newTeamData) {
+                            setRedTeam(newTeamData.redTeam);
+                            setBlueTeam(newTeamData.blueTeam);
+                        }
+                    });
                 } else {
                     console.log("Game does not exist");
                     enqueueSnackbar(`Game Not Exist`, {variant: "error"})
@@ -276,7 +288,25 @@ export default function Dashboard() {
         })
     }
 
+    // Game Teams
+
+    const [redTeam, setRedTeam] = useState(Teams[0]);
+    const [blueTeam, setBlueTeam] = useState(Teams[1]);
+
+    useEffect(() => {
+        console.log("Updating Teams")
+        console.log(redTeam, blueTeam)
+
+        if (gameID == "") return;
+
+        set(child(dbRef, `games/${gameID}/team`), {
+            redTeam: redTeam,
+            blueTeam: blueTeam,
+        });
+    }, [redTeam, blueTeam])
+
     // Game Props
+
     const [redAutoRobotTask, setRedAutoRobotTask] = useState(0);
     const [blueAutoRobotTask, setBlueAutoRobotTask] = useState(0);
     const [redUpperSidePlantingZone, setRedUpperSidePlantingZone] = useState(0);
@@ -477,19 +507,20 @@ export default function Dashboard() {
 
         if (redOccoupyingZone == 4 && redPlacedSeedlings > 5) {
             redGreatVictory = true;
-            enqueueSnackbar(`RED GREAT VICTORY`, {variant: "success", autoHideDuration: 10000})
+            enqueueSnackbar(`RED GREAT VICTORY`, {variant: "success", autoHideDuration: 10000});
             stopClock();
         }
 
         if (blueOccoupyingZone == 4 && bluePlacedSeedlings > 5) {
             blueGreatVictory = true;
-            enqueueSnackbar(`BLUE GREAT VICTORY`, {variant: "success", anchorOrigin: { horizontal: "right", vertical: "bottom" }, autoHideDuration: 10000})
+            enqueueSnackbar(`BLUE GREAT VICTORY`, {variant: "success", anchorOrigin: { horizontal: "right", vertical: "bottom" }, autoHideDuration: 10000});
             stopClock();
         }
 
         console.log(redPoints, bluePoints)
 
         gameProps.current = {
+            ...gameProps.current,
             redAutoRobotTask: redAutoRobotTask,
             blueAutoRobotTask: blueAutoRobotTask,
             redUpperSidePlantingZone: redUpperSidePlantingZone,
@@ -637,6 +668,7 @@ export default function Dashboard() {
                     gameStage={gameStage.current} 
                     clockToggle={clockToggle.current}
                     hidden={false} 
+                    shorthand={true}
                     toggleClock={toggleClock} 
                     resetStage={resetStage} 
                     changeStage={changeStage}
@@ -648,6 +680,22 @@ export default function Dashboard() {
                 top: '25%',
                 position: 'absolute',
             }}>
+                <Box style={{
+                    left: '4%',
+                    top: '10%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <ScoreDisplay color={"red"} team={redTeam} editable={true} score={gameProps.current.scores?gameProps.current.scores.red:0} teams={Teams} setTeam={setRedTeam} />
+                </Box>
+                <Box style={{
+                    right: '4%',
+                    top: '10%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <ScoreDisplay color={"blue"} team={blueTeam} editable={true} score={gameProps.current.scores?gameProps.current.scores.blue:0} teams={Teams} setTeam={setBlueTeam} />
+                </Box>
                 <Box style={{
                     height: '95%',
                     width: '100%',

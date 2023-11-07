@@ -1,3 +1,4 @@
+import { GAME_STAGES, GAME_STAGES_TEXT } from "@/common/gameStages";
 import { Box, Button, ButtonGroup } from "@chakra-ui/react";
 import "@fontsource-variable/source-code-pro";
 
@@ -7,17 +8,17 @@ export default function TimerBox(props: any) {
         <>
         <Box style={{
             position: "relative",
-            top: "-0.2rem",
+            top: props.hidden?"-2rem":"-0.2rem",
             bottom: "-0.5rem",
-            fontSize: "2rem",
+            fontSize: props.hidden?"3.5rem":"2rem",
             textAlign: "center",
             height: "1rem",
         }}>
-            {props.gameStage}
+            {props.shorthand?props.gameStage:GAME_STAGES_TEXT[GAME_STAGES.indexOf(props.gameStage)]}
         </Box>
         <Box style={{
             position: "relative",
-            top: "-0.5rem",
+            top: props.hidden?"1rem":"-0.5rem",
             bottom: "-0.5rem",
             fontSize: "5rem",
             textAlign: "center",

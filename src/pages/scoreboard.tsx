@@ -8,6 +8,8 @@ import "@fontsource-variable/quicksand";
 import TimerBox from "@/props/dashboard/TimerBox";
 import { Counter } from "@/props/dashboard/Counter";
 import { useSnackbar } from "notistack";
+import { ScoreDisplay } from "@/props/dashboard/ScoreDisplay";
+import Teams from "../props/dashboard/teams.json";
 
 export default function Dashboard() {
 
@@ -57,6 +59,18 @@ export default function Dashboard() {
                         const newPropsData = snapshot.val();
                         if (newPropsData) {
                             updateGameProps(newPropsData);
+                        }
+                    });
+
+                    if (gameData.teams) {
+                        setRedTeam(gameData.teams.redTeam);
+                        setBlueTeam(gameData.teams.blueTeam);
+                    };
+                    onValue(child(dbRef, `games/${gameID}/team`), (snapshot) => {
+                        const newTeamData = snapshot.val();
+                        if (newTeamData) {
+                            setRedTeam(newTeamData.redTeam);
+                            setBlueTeam(newTeamData.blueTeam);
                         }
                     });
 
@@ -275,6 +289,24 @@ export default function Dashboard() {
             paused: true
         })
     }
+
+    // Game Teams
+
+    const [redTeam, setRedTeam] = useState(Teams[0]);
+    const [blueTeam, setBlueTeam] = useState(Teams[0]);
+
+    useEffect(() => {
+        console.log("Updating Teams")
+        console.log(redTeam, blueTeam)
+
+        if (gameID == "") return;
+
+        set(child(dbRef, `games/${gameID}/team`), {
+            redTeam: redTeam,
+            blueTeam: blueTeam,
+        });
+    }, [redTeam, blueTeam])
+
 
     // Game Props
     const [redAutoRobotTask, setRedAutoRobotTask] = useState(0);
@@ -625,6 +657,7 @@ export default function Dashboard() {
                     gameStage={gameStage.current} 
                     clockToggle={clockToggle.current} 
                     hidden={true}
+                    shorthand={false}
                     toggleClock={toggleClock} 
                     resetStage={resetStage} 
                     changeStage={changeStage}
@@ -636,6 +669,22 @@ export default function Dashboard() {
                 top: '25%',
                 position: 'absolute',
             }}>
+                <Box style={{
+                    left: '5%',
+                    top: '10%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <ScoreDisplay color={"red"} team={redTeam} editable={false} score={gameProps.current.scores?gameProps.current.scores.red:0} teams={Teams} setTeam={setRedTeam} />
+                </Box>
+                <Box style={{
+                    right: '5%',
+                    top: '10%',
+                    position: 'absolute',
+                    zIndex: 10,
+                }}>
+                    <ScoreDisplay color={"blue"} team={blueTeam} editable={false} score={gameProps.current.scores?gameProps.current.scores.blue:0} teams={Teams} setTeam={setBlueTeam} />
+                </Box>
                 <Box style={{
                     height: '95%',
                     width: '100%',
