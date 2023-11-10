@@ -37,7 +37,7 @@ export default function Dashboard() {
                         device: { ...gameData.device, [deviceID]: "CONTROLLER" },
                     });
                     console.log("Game Fetched");
-                    enqueueSnackbar(`Game Loaded`, {variant: "success"})
+                    //enqueueSnackbar(`Game Loaded`, {variant: "success"})
                     gameStage.current = gameData.clock.stage;
                     clockElapse.current = gameData.clock.elapsed;
                     clockToggle.current = !gameData.clock.paused;
@@ -76,7 +76,7 @@ export default function Dashboard() {
 
                 } else {
                     console.log("Game does not exist");
-                    enqueueSnackbar(`Game Not Exist`, {variant: "error"})
+                    //enqueueSnackbar(`Game Not Exist`, {variant: "error"})
                 }
             }).catch((error) => {
                 console.error(error);
@@ -146,7 +146,7 @@ export default function Dashboard() {
                         paused: remainingTime > 0 ? false : true
                     })
                     if (newGameStage == "END") {
-                        enqueueSnackbar(`Game END`, {variant: "success"})
+                        //enqueueSnackbar(`Game END`, {variant: "success"})
                         gameEndVictoryCalc();
                     }
                 }
@@ -175,7 +175,7 @@ export default function Dashboard() {
         clockToggle.current = true;
         clockData.current = { stage: gameStage.current, elapsed: clockElapse.current, paused: false, timestamp: Date.now() };
         updateClockText();
-        enqueueSnackbar("Clock Started", {variant: "success"})
+        //enqueueSnackbar("Clock Started", {variant: "success"})
         set(child(dbRef, `games/${gameID}/clock`), {
             stage: gameStage.current,
             timestamp: Date.now(),
@@ -190,7 +190,7 @@ export default function Dashboard() {
         clockElapse.current += Date.now()-clockData.current.timestamp;
         clockData.current = { stage: gameStage.current, elapsed: clockElapse.current, paused: true, timestamp: Date.now() };
         updateClockText();
-        enqueueSnackbar("Clock Stopped", {variant: "success"})
+        //enqueueSnackbar("Clock Stopped", {variant: "success"})
         set(child(dbRef, `games/${gameID}/clock`), {
             stage: gameStage.current,
             timestamp: Date.now(),
@@ -215,7 +215,7 @@ export default function Dashboard() {
         clockElapse.current = 0;
         clockData.current = { stage: gameStage.current, paused: true, elapsed: 0, timestamp: Date.now() };
         updateClockText();
-        enqueueSnackbar(`Reset stage ${gameStage.current}`, {variant: "success"});
+        //enqueueSnackbar(`Reset stage ${gameStage.current}`, {variant: "success"});
         set(child(dbRef, `games/${gameID}/clock`), {
             stage: gameStage.current,
             timestamp: Date.now(),
@@ -235,7 +235,7 @@ export default function Dashboard() {
         clockElapse.current = 0;
         clockData.current = { stage: nextStage, timestamp: Date.now(), elapsed: 0, paused: remainingTime > 0 ? false : true };
         updateClockText();
-        enqueueSnackbar(`Skip stage to ${gameStage.current}`, {variant: "success"})
+        //enqueueSnackbar(`Skip stage to ${gameStage.current}`, {variant: "success"})
         set(child(dbRef, `games/${gameID}/clock`), {
             stage: nextStage,
             timestamp: Date.now(),
@@ -370,8 +370,8 @@ export default function Dashboard() {
 
         if (gameID == "") return;
         
-        if (!forceResetProps.current && gameStage.current == "PREP") {resetProps(); enqueueSnackbar("Changes not allowed at PREP", {variant: "error", preventDuplicate: true}); return;}
-        if (gameStage.current == "END") { enqueueSnackbar("Editing after game", {variant: "info"}); }
+        //if (!forceResetProps.current && gameStage.current == "PREP") {resetProps(); //enqueueSnackbar("Changes not allowed at PREP", {variant: "error", preventDuplicate: true}); return;}
+        //if (gameStage.current == "END") { //enqueueSnackbar("Editing after game", {variant: "info"}); }
 
         // GameRules
         if (redAutoRobotTask > 2) {setRedAutoRobotTask(2); return;}
@@ -385,7 +385,7 @@ export default function Dashboard() {
         const bluePlacedSeedlings = bluePlacedNormalSeedlings+bluePlacedGoldenSeedlings;
 
         if (redAutoRobotTask != 2 && redPlacedGoldenSeedlings > 0) {
-            enqueueSnackbar("Red Team Golden Seedlings Not Unlocked", {variant: "error", preventDuplicate: true})
+            //enqueueSnackbar("Red Team Golden Seedlings Not Unlocked", {variant: "error", preventDuplicate: true})
             setRedUpperSideGoldenPlantingZone(0);
             setRedCenterGoldenPlantingZone(0); 
             setRedLowerSideGoldenPlantingZone(0);
@@ -394,7 +394,7 @@ export default function Dashboard() {
         }
 
         if (blueAutoRobotTask != 2 && bluePlacedGoldenSeedlings > 0) {
-            enqueueSnackbar("Blue Team Golden Seedlings Not Unlocked", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
+            //enqueueSnackbar("Blue Team Golden Seedlings Not Unlocked", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
             setBlueUpperSideGoldenPlantingZone(0);
             setBlueCenterGoldenPlantingZone(0); 
             setBlueLowerSideGoldenPlantingZone(0);
@@ -411,7 +411,7 @@ export default function Dashboard() {
         }
 
         if (redPlacedNormalSeedlings > 9) {
-            enqueueSnackbar("Red Team Too Many Seedlings", {variant: "error", preventDuplicate: true})
+            //enqueueSnackbar("Red Team Too Many Seedlings", {variant: "error", preventDuplicate: true})
             if (redUpperSidePlantingZone > gameProps.current.redUpperSidePlantingZone) {setRedUpperSidePlantingZone(gameProps.current.redUpperSidePlantingZone); return;}
             if (redCenterPlantingZone > gameProps.current.redCenterPlantingZone) {setRedCenterPlantingZone(gameProps.current.redCenterPlantingZone); return;}
             if (redLowerSidePlantingZone > gameProps.current.redLowerSidePlantingZone) {setRedLowerSidePlantingZone(gameProps.current.redLowerSidePlantingZone); return;}
@@ -420,7 +420,7 @@ export default function Dashboard() {
 
 
         if (bluePlacedNormalSeedlings > 9) {
-            enqueueSnackbar("Blue Team Too Many Seedlings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
+            //enqueueSnackbar("Blue Team Too Many Seedlings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
             if (blueUpperSidePlantingZone > gameProps.current.blueUpperSidePlantingZone) {setBlueUpperSidePlantingZone(gameProps.current.blueUpperSidePlantingZone); return;}
             if (blueCenterPlantingZone > gameProps.current.blueCenterPlantingZone) {setBlueCenterPlantingZone(gameProps.current.blueCenterPlantingZone); return;}
             if (blueLowerSidePlantingZone > gameProps.current.blueLowerSidePlantingZone) {setBlueLowerSidePlantingZone(gameProps.current.blueLowerSidePlantingZone); return;}
@@ -428,7 +428,7 @@ export default function Dashboard() {
         }
 
         if (redPlacedGoldenSeedlings > 3) {
-            enqueueSnackbar("Red Team Too Many Golden Seedlings", {variant: "error", preventDuplicate: true})
+            //enqueueSnackbar("Red Team Too Many Golden Seedlings", {variant: "error", preventDuplicate: true})
             if (redUpperSideGoldenPlantingZone > gameProps.current.redUpperSideGoldenPlantingZone) {setRedUpperSideGoldenPlantingZone(gameProps.current.redUpperSideGoldenPlantingZone); return;}
             if (redCenterGoldenPlantingZone > gameProps.current.redCenterGoldenPlantingZone) {setRedCenterGoldenPlantingZone(gameProps.current.redCenterGoldenPlantingZone); return;}
             if (redLowerSideGoldenPlantingZone > gameProps.current.redLowerSideGoldenPlantingZone) {setRedLowerSideGoldenPlantingZone(gameProps.current.redLowerSideGoldenPlantingZone); return;}
@@ -437,7 +437,7 @@ export default function Dashboard() {
 
 
         if (bluePlacedGoldenSeedlings > 3) {
-            enqueueSnackbar("Blue Team Too Many Golden Seedlings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
+            //enqueueSnackbar("Blue Team Too Many Golden Seedlings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "right", vertical: "bottom" }})
             if (blueUpperSideGoldenPlantingZone > gameProps.current.blueUpperSideGoldenPlantingZone) {setBlueUpperSideGoldenPlantingZone(gameProps.current.blueUpperSideGoldenPlantingZone); return;}
             if (blueCenterGoldenPlantingZone > gameProps.current.blueCenterGoldenPlantingZone) {setBlueCenterGoldenPlantingZone(gameProps.current.blueCenterGoldenPlantingZone); return;}
             if (blueLowerSideGoldenPlantingZone > gameProps.current.blueLowerSideGoldenPlantingZone) {setBlueLowerSideGoldenPlantingZone(gameProps.current.blueLowerSideGoldenPlantingZone); return;}
@@ -445,7 +445,7 @@ export default function Dashboard() {
         }
 
         if (redCenterPlantingZone+redCenterGoldenPlantingZone+blueCenterPlantingZone+blueCenterGoldenPlantingZone > 8) {
-            enqueueSnackbar("Center Planting Zone Too Many Seelings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "center", vertical: "bottom" }})
+            //enqueueSnackbar("Center Planting Zone Too Many Seelings", {variant: "error", preventDuplicate: true, anchorOrigin: { horizontal: "center", vertical: "bottom" }})
             if (redCenterPlantingZone > gameProps.current.redCenterPlantingZone) {setRedCenterPlantingZone(gameProps.current.redCenterPlantingZone); return;}
             if (redCenterGoldenPlantingZone > gameProps.current.redCenterGoldenPlantingZone) {setRedCenterGoldenPlantingZone(gameProps.current.redCenterGoldenPlantingZone); return;}
             if (blueCenterPlantingZone > gameProps.current.blueCenterPlantingZone) {setBlueCenterPlantingZone(gameProps.current.blueCenterPlantingZone); return;}
@@ -624,8 +624,8 @@ export default function Dashboard() {
                 }
             }
         }
-        if (redVictory) enqueueSnackbar(`RED VICTORY`, {variant: "success", autoHideDuration: 10000})
-        if (blueVictory) enqueueSnackbar(`BLUE VICTORY`, {variant: "success", anchorOrigin: { horizontal: "right", vertical: "bottom" }, autoHideDuration: 10000})
+        //if (redVictory) enqueueSnackbar(`RED VICTORY`, {variant: "success", autoHideDuration: 10000})
+        //if (blueVictory) enqueueSnackbar(`BLUE VICTORY`, {variant: "success", anchorOrigin: { horizontal: "right", vertical: "bottom" }, autoHideDuration: 10000})
         updateVictory(redVictory, blueVictory);
     }
 
@@ -638,11 +638,15 @@ export default function Dashboard() {
             display: 'flex',
             justifyContent: 'space-between',
             //overflow: 'hidden',
-            backgroundColor: '#3A3B3C',
+            //backgroundColor: '#3A3B3C',
+            backgroundImage: 'url("/Background.jpg")',
+            backgroundSize: 'fill',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
             fontFamily: "'Quicksand Variable', sans-serif",
             fontWeight: "700",
             fontSize: "2rem",
-            color: 'white',
+            color: 'black',
         }}>
             <Box style={{
                 top: '5%',
@@ -650,6 +654,7 @@ export default function Dashboard() {
                 width: '100%',
                 position: 'absolute',
                 justifyContent: 'center',
+                textShadow: '0px 0px 10px rgba(0,0,0,0.2)',
             }}>
                 {/** Clock Box */}
                 <TimerBox 
