@@ -292,8 +292,8 @@ export default function Dashboard() {
 
     // Game Teams
 
-    const [redTeam, setRedTeam] = useState(Teams[0]);
-    const [blueTeam, setBlueTeam] = useState(Teams[0]);
+    const [redTeam, setRedTeam] = useState({"cname": "征龍", "ename": "War Dragon"});
+    const [blueTeam, setBlueTeam] = useState({"cname": "火之龍", "ename": "Fiery Dragon"});
 
     useEffect(() => {
         console.log("Updating Teams")
