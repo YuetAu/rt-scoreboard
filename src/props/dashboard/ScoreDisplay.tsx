@@ -19,23 +19,23 @@ export function ScoreDisplay(props: any) {
             >   
                 {props.editable ?
                 (<Box mt={"1rem"} p={"0"}>
-                    <Box mt={"1rem"} onClick={()=>{setDropDownOpen(!dropDownOpen)}} style={{cursor: "pointer"}}>
-                        {props.team.cname}
+                    <Box mt={props.team.cname!=""?"1rem":"1.5rem"} onClick={()=>{setDropDownOpen(!dropDownOpen)}} style={{cursor: "pointer", fontSize: props.team.cname!=""?"2rem":"2.5rem"}}>
+                        {props.team.cname!=""?props.team.cname:props.team.ename}
                         <br />
-                        {props.team.ename}
+                        {props.team.cname!=""?props.team.ename:""}
                     </Box>
                     {dropDownOpen && <TeamDropDownList teams={props.teams} setTeam={props.setTeam} currentTeam={props.team.ename} setOpen={setDropDownOpen}/>}
-                    <Box my={"3rem"} style={{fontSize: "4rem"}}>
+                    <Box my={props.team.cname!=""?"3rem":"2.5rem"} style={{fontSize: "4rem"}}>
                         {props.score}
                     </Box>
                 </Box>) :
                 (<>
-                    <Box mt={"1rem"}>
-                        {props.team.cname}
+                    <Box mt={props.team.cname!=""?"1rem":"1.5rem"} onClick={()=>{setDropDownOpen(!dropDownOpen)}} style={{cursor: "pointer", fontSize: props.team.cname!=""?"2rem":"2.5rem"}}>
+                        {props.team.cname!=""?props.team.cname:props.team.ename}
                         <br />
-                        {props.team.ename}
+                        {props.team.cname!=""?props.team.ename:""}
                     </Box>
-                    <Box my={"3rem"} style={{fontSize: "4rem"}}>
+                    <Box my={props.team.cname!=""?"3rem":"2.5rem"} style={{fontSize: "4rem"}}>
                         {props.score}
                     </Box>
                 </>)}
