@@ -473,6 +473,9 @@ export default function Dashboard() {
 
         console.log(redPoints, bluePoints)
 
+        setRedPoints(redPoints);
+        setBluePoints(bluePoints);
+
         gameProps.current = {
             redAutoRobotTask: redAutoRobotTask,
             blueAutoRobotTask: blueAutoRobotTask,
@@ -526,61 +529,8 @@ export default function Dashboard() {
         redAutoRobotMove, blueAutoRobotMove,
     ])
 
-    const gameEndVictoryCalc = () => {
-        // Preform Victory Check after 3 minutes Game Time
-        // Per Interpretation on 2.7.1
-        // The team with a higher total score
-        /*
-        In case two teams have the same score, the winner will be decided according to the following order:
-            i.  The team that occupies more Planting Zone;
-            ii. The team whose AR finished all the AR tasks first;
-            iii. The team with more golden seedlings in the Planting Zones;
-            iv. The team that has committed fewer violations;
-            v. The team with a less total weight of robots;
-            vi. Decisions made by referees.
-        */
-
-        const updateVictory = (redVictory: boolean, blueVictory: boolean) => {
-            set(child(dbRef, `games/${gameID}/props/scores`), {
-                redVictory: redVictory,
-                blueVictory: blueVictory,
-            });
-        }
-
-        var redVictory = false;
-        var blueVictory = false;
-        
-        if (gameProps.current.scores.red > gameProps.current.scores.blue) {
-            redVictory = true;
-        } else if (gameProps.current.scores.red < gameProps.current.scores.blue) {
-            blueVictory = true;
-        } else {
-            if (gameProps.current.scores.redOccoupyingZone > gameProps.current.scores.blueOccoupyingZone) {
-                redVictory = true;
-            } else if (gameProps.current.scores.redOccoupyingZone < gameProps.current.scores.blueOccoupyingZone) {
-                blueVictory = true;
-            } else {
-                if (gameProps.current.scores.redAutoRobotTaskElapsed < gameProps.current.scores.blueAutoRobotTaskElapsed) {
-                    redVictory = true;
-                } else if (gameProps.current.scores.redAutoRobotTaskElapsed > gameProps.current.scores.blueAutoRobotTaskElapsed) {
-                    blueVictory = true;
-                } else {
-                    if (gameProps.current.scores.redPlacedGoldenSeedlings > gameProps.current.scores.bluePlacedGoldenSeedlings) {
-                        redVictory = true;
-                    } else if (gameProps.current.scores.redPlacedGoldenSeedlings < gameProps.current.scores.bluePlacedGoldenSeedlings) {
-                        blueVictory = true;
-                    } else {
-                        // Unable to determine winner
-                        redVictory = false;
-                        blueVictory = false;
-                    }
-                }
-            }
-        }
-        //if (redVictory) enqueueSnackbar(`RED VICTORY`, {variant: "success", autoHideDuration: 10000})
-        //if (blueVictory) enqueueSnackbar(`BLUE VICTORY`, {variant: "success", anchorOrigin: { horizontal: "right", vertical: "bottom" }, autoHideDuration: 10000})
-        updateVictory(redVictory, blueVictory);
-    }
+    const [redPoints, setRedPoints] = useState(0);
+    const [bluePoints, setBluePoints] = useState(0);
 
     return (
         <>
@@ -633,7 +583,7 @@ export default function Dashboard() {
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <ScoreDisplay color={"red"} team={redTeam} editable={false} score={gameProps.current.scores?gameProps.current.scores.red:0} teams={Teams} setTeam={setRedTeam} />
+                    <ScoreDisplay color={"red"} team={redTeam} editable={false} score={redPoints} teams={Teams} setTeam={setRedTeam} />
                 </Box>
                 <Box style={{
                     right: '5%',
@@ -641,7 +591,7 @@ export default function Dashboard() {
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <ScoreDisplay color={"blue"} team={blueTeam} editable={false} score={gameProps.current.scores?gameProps.current.scores.blue:0} teams={Teams} setTeam={setBlueTeam} />
+                    <ScoreDisplay color={"blue"} team={blueTeam} editable={false} score={bluePoints} teams={Teams} setTeam={setBlueTeam} />
                 </Box>
                 <Box style={{
                     height: '95%',

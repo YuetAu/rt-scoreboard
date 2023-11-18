@@ -559,6 +559,9 @@ export default function Dashboard() {
 
         console.log(redPoints, bluePoints)
 
+        setRedPoints(redPoints);
+        setBluePoints(bluePoints);
+
         gameProps.current = {
             ...gameProps.current,
             redAutoRobotTask: redAutoRobotTask,
@@ -669,6 +672,9 @@ export default function Dashboard() {
         updateVictory(redVictory, blueVictory);
     }
 
+    const [redPoints, setRedPoints] = useState(0);
+    const [bluePoints, setBluePoints] = useState(0);
+
     return (
         <>
         <Box style={{
@@ -727,7 +733,7 @@ export default function Dashboard() {
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <ScoreDisplay color={"red"} team={redTeam} editable={true} score={gameProps.current.scores?gameProps.current.scores.red:0} teams={Teams} setTeam={setRedTeam} />
+                    <ScoreDisplay color={"red"} team={redTeam} editable={true} score={redPoints} teams={Teams} setTeam={setRedTeam} />
                 </Box>
                 <Box style={{
                     right: '4%',
@@ -735,7 +741,7 @@ export default function Dashboard() {
                     position: 'absolute',
                     zIndex: 10,
                 }}>
-                    <ScoreDisplay color={"blue"} team={blueTeam} editable={true} score={gameProps.current.scores?gameProps.current.scores.blue:0} teams={Teams} setTeam={setBlueTeam} />
+                    <ScoreDisplay color={"blue"} team={blueTeam} editable={true} score={bluePoints} teams={Teams} setTeam={setBlueTeam} />
                 </Box>
                 <Box style={{
                     height: '95%',
