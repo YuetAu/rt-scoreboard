@@ -76,7 +76,7 @@ export default function Dashboard() {
 
                 } else {
                     console.log("Game does not exist");
-                    //enqueueSnackbar(`Game Not Exist`, {variant: "error"})
+                    createGame(gameID);
                 }
             }).catch((error) => {
                 console.error(error);
@@ -145,19 +145,14 @@ export default function Dashboard() {
                         elapsed: 0,
                         paused: remainingTime > 0 ? false : true
                     })
-                    if (newGameStage == "END") {
-                        //enqueueSnackbar(`Game END`, {variant: "success"})
-                        gameEndVictoryCalc();
-                    }
                 }
             }
         }
     }
 
 
-    const createGame = () => {
-        const newGameID = generateSlug(2);
-        grandClock.current = true;
+    const createGame = (gameID: string) => {
+        const newGameID = gameID;
         const newDeviceID = generateSlug(2);
         setDeviceID(newDeviceID);
         set(child(dbRef, `games/${newGameID}`), {
@@ -274,22 +269,6 @@ export default function Dashboard() {
         }
     }, [])
 
-    const resetClock = () => {
-        stopClock();
-        console.log("Reset Clock")
-        clockToggle.current = false;
-        clockElapse.current = 0;
-        gameStage.current = GAME_STAGES[0]
-        clockData.current = { stage: gameStage.current, paused: true, elapsed: 0, timestamp: Date.now() };
-        updateClockText();
-        set(child(dbRef, `games/${gameID}/clock`), {
-            stage: gameStage.current,
-            timestamp: Date.now(),
-            elapsed: 0,
-            paused: true
-        })
-    }
-
     // Game Teams
 
     const [redTeam, setRedTeam] = useState({"cname": "征龍", "ename": "War Dragon"});
@@ -335,36 +314,6 @@ export default function Dashboard() {
     const [gameScore, setGameScore] = useState({ red: 0, blue: 0, redOccoupyingZone: 0, blueOccoupyingZone: 0, redPlacedSeedlings: 0, bluePlacedSeedlings: 0, redGreatVictory: false, blueGreatVictory: false });
     const gameProps = useRef<any>({});
 
-    const forceResetProps = useRef(false);
-
-    const resetProps = () => {
-        forceResetProps.current = true;
-        setRedAutoRobotTask(0);
-        setBlueAutoRobotTask(0);
-        setRedUpperSidePlantingZone(0);
-        setRedLowerSidePlantingZone(0);
-        setBlueUpperSidePlantingZone(0);
-        setBlueLowerSidePlantingZone(0);
-        setRedColouredPlantingZone(0);
-        setBlueColouredPlantingZone(0);
-        setRedCenterPlantingZone(0);
-        setBlueCenterPlantingZone(0);
-        setRedCenterGoldenPlantingZone(0);
-        setBlueCenterGoldenPlantingZone(0);
-        setRedUpperSideGoldenPlantingZone(0);
-        setBlueUpperSideGoldenPlantingZone(0);
-        setRedLowerSideGoldenPlantingZone(0);
-        setBlueLowerSideGoldenPlantingZone(0);
-        setRedColouredGoldenPlantingZone(0);
-        setBlueColouredGoldenPlantingZone(0);
-        setRedAutoRobotRecogn(0);
-        setBlueAutoRobotRecogn(0);
-        setRedAutoRobotMove(0);
-        setBlueAutoRobotMove(0);
-        gameProps.current = {};
-        forceResetProps.current = false;
-    }
-
     useEffect(() => {
         console.log("Updating Props")
 
@@ -384,7 +333,7 @@ export default function Dashboard() {
         const bluePlacedGoldenSeedlings = blueUpperSideGoldenPlantingZone+blueCenterGoldenPlantingZone+blueLowerSideGoldenPlantingZone+blueColouredGoldenPlantingZone;
         const bluePlacedSeedlings = bluePlacedNormalSeedlings+bluePlacedGoldenSeedlings;
 
-        if (redAutoRobotTask != 2 && redPlacedGoldenSeedlings > 0) {
+        /* if (redAutoRobotTask != 2 && redPlacedGoldenSeedlings > 0) {
             //enqueueSnackbar("Red Team Golden Seedlings Not Unlocked", {variant: "error", preventDuplicate: true})
             setRedUpperSideGoldenPlantingZone(0);
             setRedCenterGoldenPlantingZone(0); 
@@ -400,7 +349,7 @@ export default function Dashboard() {
             setBlueLowerSideGoldenPlantingZone(0);
             setBlueColouredGoldenPlantingZone(0);
             return;
-        }
+        } */
 
         // For Future Victory Check
         if (gameProps.current.scores) {
@@ -480,6 +429,7 @@ export default function Dashboard() {
         // The team occupying 4 Planting Zones with more than 5 seedlings in total will achieve Great Victory, the team wins and the game ends immediately.
         var redGreatVictory = false;
         var blueGreatVictory = false;
+        var greatVictoryTimestamp = 0;
         var redOccoupyingZone = 0;
         var blueOccoupyingZone = 0;
 
@@ -509,12 +459,14 @@ export default function Dashboard() {
 
         if (redOccoupyingZone == 4 && redPlacedSeedlings > 5) {
             redGreatVictory = true;
+            greatVictoryTimestamp = (GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage.current)]*1000)-clockData.current.elapsed-(Date.now()-clockData.current.timestamp);
             enqueueSnackbar(`RED GREAT VICTORY`, {variant: "success", autoHideDuration: 10000})
             stopClock();
         }
 
         if (blueOccoupyingZone == 4 && bluePlacedSeedlings > 5) {
             blueGreatVictory = true;
+            greatVictoryTimestamp = (GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage.current)]*1000)-clockData.current.elapsed-(Date.now()-clockData.current.timestamp);
             enqueueSnackbar(`BLUE GREAT VICTORY`, {variant: "success", anchorOrigin: { horizontal: "right", vertical: "bottom" }, autoHideDuration: 10000})
             stopClock();
         }
@@ -556,6 +508,7 @@ export default function Dashboard() {
                 bluePlacedGoldenSeedlings: bluePlacedGoldenSeedlings,
                 redGreatVictory: redGreatVictory,
                 blueGreatVictory: blueGreatVictory,
+                greatVictoryTimestamp: greatVictoryTimestamp,
             }
         }
 
@@ -876,7 +829,7 @@ export default function Dashboard() {
                 <Button colorScheme='blue' mr={3} onClick={submitGameID}>
                 Submit
                 </Button>
-                <Button colorScheme='green' mr={3} onClick={createGame}>
+                <Button colorScheme='green' mr={3} onClick={()=>{createGame(gameID)}}>
                 Create Game
                 </Button>
             </ModalFooter>

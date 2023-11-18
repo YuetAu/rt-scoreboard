@@ -74,7 +74,7 @@ export default function Dashboard() {
                     });
                 } else {
                     console.log("Game does not exist");
-                    enqueueSnackbar(`Game Not Exist`, {variant: "error"})
+                    createGame(gameID);
                 }
             }).catch((error) => {
                 console.error(error);
@@ -147,14 +147,18 @@ export default function Dashboard() {
                         enqueueSnackbar(`Game END`, {variant: "success"})
                         gameEndVictoryCalc();
                     }
+                    if (newGameStage == "GAME") {
+                        stopClock();
+                        resetStage();
+                    }
                 }
             }
         }
     }
 
 
-    const createGame = () => {
-        const newGameID = generateSlug(2);
+    const createGame = (gameID: string) => {
+        const newGameID = gameID;
         grandClock.current = true;
         const newDeviceID = generateSlug(2);
         setDeviceID(newDeviceID);
@@ -333,10 +337,45 @@ export default function Dashboard() {
     const [gameScore, setGameScore] = useState({ red: 0, blue: 0, redOccoupyingZone: 0, blueOccoupyingZone: 0, redPlacedSeedlings: 0, bluePlacedSeedlings: 0, redGreatVictory: false, blueGreatVictory: false });
     const gameProps = useRef<any>({});
 
-    const forceResetProps = useRef(false);
-
     const resetProps = () => {
-        forceResetProps.current = true;
+        gameProps.current = {
+            redAutoRobotTask: 0,
+            blueAutoRobotTask: 0,
+            redUpperSidePlantingZone: 0,
+            redLowerSidePlantingZone: 0,
+            blueUpperSidePlantingZone: 0,
+            blueLowerSidePlantingZone: 0,
+            redColouredPlantingZone: 0,
+            blueColouredPlantingZone: 0,
+            redCenterPlantingZone: 0,
+            blueCenterPlantingZone: 0,
+            redCenterGoldenPlantingZone: 0,
+            blueCenterGoldenPlantingZone: 0,
+            redUpperSideGoldenPlantingZone: 0,
+            blueUpperSideGoldenPlantingZone: 0,
+            redLowerSideGoldenPlantingZone: 0,
+            blueLowerSideGoldenPlantingZone: 0,
+            redColouredGoldenPlantingZone: 0,
+            blueColouredGoldenPlantingZone: 0,
+            redAutoRobotRecogn: 0,
+            blueAutoRobotRecogn: 0,
+            redAutoRobotMove: 0,
+            blueAutoRobotMove: 0,
+            scores: {
+                red: 0,
+                blue: 0,
+                redOccoupyingZone: 0,
+                blueOccoupyingZone: 0,
+                redPlacedSeedlings: 0,
+                bluePlacedSeedlings: 0,
+                redPlacedGoldenSeedlings: 0,
+                bluePlacedGoldenSeedlings: 0,
+                redGreatVictory: false,
+                blueGreatVictory: false,
+                greatVictoryTimestamp: 0,
+            }
+        }
+        set(child(dbRef, `games/${gameID}/props`), gameProps.current);
         setRedAutoRobotTask(0);
         setBlueAutoRobotTask(0);
         setRedUpperSidePlantingZone(0);
@@ -359,8 +398,6 @@ export default function Dashboard() {
         setBlueAutoRobotRecogn(0);
         setRedAutoRobotMove(0);
         setBlueAutoRobotMove(0);
-        gameProps.current = {};
-        forceResetProps.current = false;
     }
 
     useEffect(() => {
@@ -368,8 +405,8 @@ export default function Dashboard() {
 
         if (gameID == "") return;
         
-        if (!forceResetProps.current && gameStage.current == "PREP") {resetProps(); enqueueSnackbar("Changes not allowed at PREP", {variant: "error", preventDuplicate: true}); return;}
-        if (gameStage.current == "END") { enqueueSnackbar("Editing after game", {variant: "info"}); }
+        //if (!forceResetProps.current && gameStage.current == "PREP") {resetProps(); enqueueSnackbar("Changes not allowed at PREP", {variant: "error", preventDuplicate: true}); return;}
+        //if (gameStage.current == "END") { enqueueSnackbar("Editing after game", {variant: "info"}); }
 
         // GameRules
         if (redAutoRobotTask > 2) {setRedAutoRobotTask(2); return;}
@@ -382,7 +419,7 @@ export default function Dashboard() {
         const bluePlacedGoldenSeedlings = blueUpperSideGoldenPlantingZone+blueCenterGoldenPlantingZone+blueLowerSideGoldenPlantingZone+blueColouredGoldenPlantingZone;
         const bluePlacedSeedlings = bluePlacedNormalSeedlings+bluePlacedGoldenSeedlings;
 
-        if (redAutoRobotTask != 2 && redPlacedGoldenSeedlings > 0) {
+        /* if (redAutoRobotTask != 2 && redPlacedGoldenSeedlings > 0) {
             enqueueSnackbar("Red Team Golden Seedlings Not Unlocked", {variant: "error", preventDuplicate: true})
             setRedUpperSideGoldenPlantingZone(0);
             setRedCenterGoldenPlantingZone(0); 
@@ -398,7 +435,7 @@ export default function Dashboard() {
             setBlueLowerSideGoldenPlantingZone(0);
             setBlueColouredGoldenPlantingZone(0);
             return;
-        }
+        } */
 
         // For Future Victory Check
         if (gameProps.current.scores) {
@@ -478,6 +515,7 @@ export default function Dashboard() {
         // The team occupying 4 Planting Zones with more than 5 seedlings in total will achieve Great Victory, the team wins and the game ends immediately.
         var redGreatVictory = false;
         var blueGreatVictory = false;
+        var greatVictoryTimestamp = 0;
         var redOccoupyingZone = 0;
         var blueOccoupyingZone = 0;
 
@@ -507,14 +545,16 @@ export default function Dashboard() {
 
         if (redOccoupyingZone == 4 && redPlacedSeedlings > 5) {
             redGreatVictory = true;
+            greatVictoryTimestamp = (GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage.current)]*1000)-clockData.current.elapsed-(Date.now()-clockData.current.timestamp);
             enqueueSnackbar(`RED GREAT VICTORY`, {variant: "success", autoHideDuration: 10000});
-            stopClock();
+            //stopClock(); // Per Request from HKUST Robocon 2023 CEO Henry
         }
 
         if (blueOccoupyingZone == 4 && bluePlacedSeedlings > 5) {
             blueGreatVictory = true;
+            greatVictoryTimestamp = (GAME_STAGES_TIME[GAME_STAGES.indexOf(gameStage.current)]*1000)-clockData.current.elapsed-(Date.now()-clockData.current.timestamp);
             enqueueSnackbar(`BLUE GREAT VICTORY`, {variant: "success", anchorOrigin: { horizontal: "right", vertical: "bottom" }, autoHideDuration: 10000});
-            stopClock();
+            //stopClock(); // Per Request from HKUST Robocon 2023 CEO Henry
         }
 
         console.log(redPoints, bluePoints)
@@ -555,6 +595,7 @@ export default function Dashboard() {
                 bluePlacedGoldenSeedlings: bluePlacedGoldenSeedlings,
                 redGreatVictory: redGreatVictory,
                 blueGreatVictory: blueGreatVictory,
+                greatVictoryTimestamp: greatVictoryTimestamp,
             }
         }
 
@@ -898,7 +939,7 @@ export default function Dashboard() {
                 <Button colorScheme='blue' mr={3} onClick={submitGameID}>
                 Submit
                 </Button>
-                <Button colorScheme='green' mr={3} onClick={createGame}>
+                <Button colorScheme='green' mr={3} onClick={()=>createGame(generateSlug(2))}>
                 Create Game
                 </Button>
             </ModalFooter>

@@ -53,8 +53,26 @@ export default function Display() {
                             setBlueTeamPoints(newScores.blue);
                             if (newScores.redGreatVictory) {
                                 setGreatVictory("red");
+                                const remainingTime = newScores.greatVictoryTimestamp;
+                                const minutes = Math.floor(remainingTime/60000)+"";
+                                const seconds = Math.floor(remainingTime/1000%60)+"";
+                                const milliseconds = remainingTime%1000+"";
+                                setGreatVictoryTimestamp({
+                                    minutes: minutes.length < 2 ? "0"+minutes : minutes,
+                                    seconds: seconds.length < 2 ? "0"+seconds : seconds,
+                                    milliseconds: milliseconds.length < 3 ? milliseconds.length < 2 ? "00"+milliseconds : "0"+milliseconds : milliseconds
+                                })
                             } else if (newScores.blueGreatVictory) {
                                 setGreatVictory("blue");
+                                const remainingTime = newScores.greatVictoryTimestamp;
+                                const minutes = Math.floor(remainingTime/60000)+"";
+                                const seconds = Math.floor(remainingTime/1000%60)+"";
+                                const milliseconds = remainingTime%1000+"";
+                                setGreatVictoryTimestamp({
+                                    minutes: minutes.length < 2 ? "0"+minutes : minutes,
+                                    seconds: seconds.length < 2 ? "0"+seconds : seconds,
+                                    milliseconds: milliseconds.length < 3 ? milliseconds.length < 2 ? "00"+milliseconds : "0"+milliseconds : milliseconds
+                                })
                             } else {
                                 setGreatVictory("");
                             }
@@ -62,7 +80,7 @@ export default function Display() {
                     });
                 } else {
                     console.log("Game does not exist");
-                    //Notify user
+                    createGame(gameID);
                 }
             }).catch((error) => {
                 console.error(error);
@@ -110,16 +128,15 @@ export default function Display() {
         }
     }
 
-
-    const createGame = () => {
-        const newGameID = generateSlug(2);
-        grandClock.current = true;
+    const createGame = (gameID: string) => {
+        const newGameID = gameID;
         const newDeviceID = generateSlug(2);
         setDeviceID(newDeviceID);
         set(child(dbRef, `games/${newGameID}`), {
             createdAt: Date.now(),
             device: {},
-            clock: { stage: "PREP", timestamp: 0, elapsed: 0, paused: true }
+            clock: { stage: "PREP", timestamp: 0, elapsed: 0, paused: true },
+            props: {},
         });
         setGameID(newGameID);
         setGameIDModal(false);
@@ -142,6 +159,7 @@ export default function Display() {
     const [redTeamPoints, setRedTeamPoints] = useState(0);
     const [blueTeamPoints, setBlueTeamPoints] = useState(0);
     const [greatVictory, setGreatVictory] = useState("");
+    const [greatVictoryTimestamp, setGreatVictoryTimestamp] = useState({ minutes: "00", seconds: "00", milliseconds: "000" });
 
     return (
         <>
@@ -152,6 +170,7 @@ export default function Display() {
                     blueTeamPoints={blueTeamPoints} 
                     gameStage={GAME_STAGES_TEXT[GAME_STAGES.indexOf(gameStage.current)]}
                     greatVictory={greatVictory}
+                    greatVictoryTimestamp={greatVictoryTimestamp}
                 />
         </Box>
         <Modal isOpen={gameIDModal} onClose={()=>{}} isCentered>
@@ -166,7 +185,7 @@ export default function Display() {
                 <Button colorScheme='blue' mr={3} onClick={submitGameID}>
                 Submit
                 </Button>
-                <Button colorScheme='green' mr={3} onClick={createGame}>
+                <Button colorScheme='green' mr={3} onClick={()=>createGame(generateSlug(2))}>
                 Create Game
                 </Button>
             </ModalFooter>
